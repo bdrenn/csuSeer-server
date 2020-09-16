@@ -4,3 +4,10 @@ secret_constants.json
 markov
 *.log
 *.DS_Store
+
+# Python
+.python-version
+*.pyc
+
+# Editors
+*.swp
