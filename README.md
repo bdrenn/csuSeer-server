@@ -48,6 +48,7 @@ python3 manage.py runserver
 ## Credits
 * Daniel Jackson Bursch - Backend
 * Ignacio Saenz de Navarrete Munar - [Frontend](https://github.com/ignacioSaenzdeN/Csu_FE_MainApp)
+* Brian Drennan
 
 ## License
 * GNU GENERAL PUBLIC LICENSE - Version 3, 29 June 2007
