@@ -18,14 +18,6 @@ Using a Markov Chain Model that is trained on thousands of examples from previou
 ```bash
 sudo systemctl start mongod
 ```
-* Start mongoDB
-```bash
-mongo
-```
-* Stop mongod
-```bash
-sudo systemctl stop mongod
-```
 2. Install requirements
 ```bash
 pip install -r requirements.txt
@@ -36,6 +28,15 @@ python3 manage.py runserver
 ```
 4. Access the local instance from http://localhost:8000/login
 
+## Helpful Commands
+* Start mongoDB
+```bash
+mongo
+```
+* Stop mongod
+```bash
+sudo systemctl stop mongod
+```
 
 ## Security
 ### Verification
