@@ -13,21 +13,30 @@ Using a Markov Chain Model that is trained on thousands of examples from previou
 * Due to our application being a work in progress, more graphs with multiple different formats will be added soon
 
 ## Getting Started
-1. Install requirements
+1. Install and Run MongoDB 
+* Start mongod
+```bash
+sudo systemctl start mongod
+```
+2. Install requirements
 ```bash
 pip install -r requirements.txt
 ```
-2. Install Mongodb with brew
-```bash
-brew tap mongodb/brew \
-brew install mongodb-community \
-brew services start mongodb-community
-```
-3. Run the applicaton
+3. Run the licaton
 ```bash
 python3 manage.py runserver
 ```
 4. Access the local instance from http://localhost:8000/login
+
+## Helpful Commands
+* Start mongoDB
+```bash
+mongo
+```
+* Stop mongod
+```bash
+sudo systemctl stop mongod
+```
 
 ## Security
 ### Verification
