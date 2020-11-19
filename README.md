@@ -16,7 +16,7 @@ Using a Markov Chain Model that is trained on thousands of examples from previou
 1. Install and Run MongoDB 
 * Start mongod
 ```bash
-sudo systemctl start mongod
+start mongod
 ```
 2. Install requirements
 ```bash
