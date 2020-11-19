@@ -117,7 +117,7 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 import json
-file = open("server/secret_constants.json", "r")
+file = open("secret_constants.json", "r")
 secretkey = json.loads(file.read())
 
 SIMPLE_JWT = {
