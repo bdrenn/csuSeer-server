@@ -4,8 +4,8 @@ from django.contrib.auth.models import Permission
 from django.contrib.auth import authenticate
 from django.contrib.contenttypes.models import ContentType
 from .models import HigherEdDatabase, predictionType, User, DepartmentConsumer, CollegeConsumer, UniversityConsumer, SystemConsumer, DepartmentProvider, CollegeProvider, UniversityProvider, SystemProvider, Developer
-from .cohortModel import cohortTest, cohortTrain
-from .pso import particleSwarmOptimization
+from lotus.cohortModel import cohortTest, cohortTrain
+from lotus.pso import particleSwarmOptimization
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework.utils import json
