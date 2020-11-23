@@ -6,10 +6,13 @@ secret_constants.json
 .python-version
 *.pyc
 
-# Editors
+# IDE
 *.swp
 *.log
 *.DS_Store
 
 # Migrations
 server/insert2DB/migrations
+
+# Python
+*__pycache__
