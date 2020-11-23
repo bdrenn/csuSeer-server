@@ -15,4 +15,4 @@ secret_constants.json
 server/insert2DB/migrations
 
 # Python
-*__pycache__
+**/__pycache__
