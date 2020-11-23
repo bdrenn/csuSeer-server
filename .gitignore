@@ -1,9 +1,6 @@
-#secret key
+
+# Secrets
 secret_constants.json
-secret_constants.json
-markov
-*.log
-*.DS_Store
 
 # Python
 .python-version
@@ -11,3 +8,8 @@ markov
 
 # Editors
 *.swp
+*.log
+*.DS_Store
+
+# Migrations
+server/migrations/
