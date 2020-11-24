@@ -3,15 +3,27 @@ import random as rm
 
 
 def cohortTrain(nStudents,s,b,a):
+	"""
+	Description: 
+	- Model a cohort of students as they progress through program 
+
+	inputs:
+	- nstudents: number of students. EX: College of engineering 700 students
+	- s: Determined by the pyswarm, decimal value of students that will leave everys semester.
+	- b: Determined by pywarm, decimal value for the rate of students who don't advance becauyse of dfw
+	- a: 
+	"""
 	#This is for when the model is already trained
 	nStudents = int(nStudents)
 
 	##Inputs
 	n = 8 #number of semesters in road map
-	k = 15 #number of semesters to model
-	p = 0 #steady state trigger, if p=1 steady-state, p=0 only add students in year 1 
+	k = 15 #number of semesters to model (upper limit not worth modeling )
+	p = 0 #steady state trigger, if p=1 steady-state, p=0 only add students in year 1 	(boolean) 
+
+	# boolena to calculate the number of units in college or units in University
 	h = 0 #college trigger, if h=1, only calc College, if =0, calc university
-	q =0 #system shock trigger, if q=1, add shock semester 15, if q=0 just steady state
+	q = 0 #system shock trigger, if q=1, add shock semester 15, if q=0 just steady state
 	
 	#Calibration Factors:
 	##Calibration factors for PSO
@@ -45,24 +57,42 @@ def cohortTrain(nStudents,s,b,a):
 
 
 ###STUDENT FLOW MODEL###
+	# Time (semesters 1...15)
 	for t in range(1, k+2): #TIME
+		#Semester blocks (freshman semester 1 ...)
 		for s in range(1, n+1):
+
+			# Matrix x: How many students are there at a given time 
+			# How many students are present in any given semester at any given time
+			# If time is (semester 1) 
 			if t <= 1:
 				x[s,t]=x_advance[s-1,t-1]+incoming[s]+x_DFW[s,t-1]+x_slowed[s,t-1]
 			else:
+				# Mod is to find only ppl in fall
 				x[s,t]=x_advance[s-1,t-1]+incoming[s]*(1-np.mod(t+1,2))*p+x_DFW[s,t-1]+x_slowed[s,t-1]
 
+			# Ordering matters here: 
+			# Students withdrawing
 			x_Withdraw[s,t]=x[s,t]*(sigma[s])
+			# If student withdrew they cannot migrate (can't come back to university deparment if withdrew)
 			x_migration[s,t]=x[s,t]*(lmbda[s])*(1-sigma[s])
+			# If student withdrew they are not coming back next semester
 			x_DFW[s,t]=x[s,t]*(beta[s])*(1-lmbda[s])*(1-sigma[s])
+			# If student withdrew they are not coming back next semester
+			# TODO: May need to subtract lambda
 			x_slowed[s,t]=x[s,t]*(alpha[s])*(1-sigma[s])*(1-beta[s])
+			# Students who remaining Woohoo! 
 			x_advance[s,t]=x[s,t]*(1-sigma[s])*(1-lmbda[s])*(1-beta[s])*(1-alpha[s])
 			#print((1-sigma[s]))
 
 		y[0,t]= np.sum(x[:,t]) #number_of_students_enrolled
 		#print(x_advance)
 		graduated[0,t]=np.sum(x_advance[s,1:t])
+
+		# Assuming student taking 15 units
+		# Sum of all the units  
 		number_of_units_attempted[0,t]=(1-h)*(np.sum(y[0,t])-np.sum(x_slowed[:,t]))*15+(h)*np.sum((x[:,t]-x_slowed[:,t])*np.transpose(COEUnits))
+		# Sum for DFW
 		number_of_units_DFWed[0,t]=(1-h)*np.sum(x_DFW[:,t]*15)+h*np.sum(x_DFW[:,t]*np.transpose(COEUnits))
 
 
