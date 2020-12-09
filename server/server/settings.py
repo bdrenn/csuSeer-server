@@ -47,11 +47,13 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'rest_framework.authtoken',
+    'corsheaders',
 ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
@@ -187,3 +189,4 @@ EMAIL_PORT = 587
 EMAIL_HOST_USER = 'csumarkov@gmail.com'
 EMAIL_HOST_PASSWORD = 'Wordpass123'
 EMAIL_USE_TLS = True
+CORS_ORIGIN_WHITELIST = 'http://localhost:4200',
