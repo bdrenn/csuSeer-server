@@ -56,7 +56,7 @@ sudo systemctl stop mongod
 
 ## Credits
 * Daniel Jackson Bursch - Backend
-* Ignacio Saenz de Navarrete Munar - [Frontend](https://github.com/ignacioSaenzdeN/Csu_FE_MainApp)
+* Ignacio Saenz de Navarrete Munar - [Frontend](https://github.com/dburela/Csulb_Project_Version2)
 * Brian Drennan
 
 ## License
