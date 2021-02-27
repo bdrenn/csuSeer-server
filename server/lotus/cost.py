@@ -4,13 +4,14 @@ import random as rm
 # include graduation, retention, # of students, and units
 
 
-def cost(x, nStudents):
-    UnivGrad10 = [0, 0, 1, 33, 195, 305]
+def cost(x, nStudents,gradList):
+    #[0, 0, 1, 33, 195, 305]
+
+    UnivGrad10 = gradList
     graderror1 = [0, 0, 0, 0, 0, 0]
     graderror2 = [0, 0, 0, 0, 0, 0]
     graderror3 = [0, 0, 0, 0, 0, 0]
     endsumerror = []
-    print(x)
     for j in range(0, len(x)):
         s = x[j, 0]
         b = x[j, 1]
@@ -20,8 +21,12 @@ def cost(x, nStudents):
         for i in range(0, 5):
             graderror1[i] = np.power(
                 (UnivGrad10[i]-grad[i]), 2)/np.power((UnivGrad10[i]+.0001), 2)
+        # print("graderror1")
+        # print(graderror1)
         # + np.sum(graderror2) + np.sum(graderror3)
         endsumerror.append(np.sum(graderror1))
+        # print("endsumerror")
+        # print(endsumerror)
     return endsumerror
 
 

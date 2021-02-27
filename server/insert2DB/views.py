@@ -187,7 +187,8 @@ class multipleData(APIView):
 @api_view(["POST"])
 def uploadFile(request):
     # HigherEdDataBase is the raw records provided by the users
-    # TODO insert json with upload data to be saved in HigherEdData
+    # DONE TODO insert json with upload data to be saved in HigherEdData
+    print(request.data.get('data'))
     newData = HigherEdDatabase(data=request.data.get('data'), collegeName=request.data.get('collegeName'), departmentName=request.data.get('departmentName'), universityName=request.data.get(
         'universityName'), cohortDate=request.data.get('cohortDate'), amountOfStudents=request.data.get('amountOfStudents'), pubDate=timezone.now())
     newData.save()
@@ -204,9 +205,17 @@ def uploadFile(request):
 def trainModel(request):
     uniqueID = request.data.get('uniqueID')
     schoolData = HigherEdDatabase.objects.filter(id=uniqueID)
-    # print(schoolData)
+    print(type(schoolData))
+    print(type(schoolData[0]))
+    print(type(str(schoolData[0])))
+    res = str(schoolData[0]).strip('][').split(', ')
+    print(res)
+    print(type(res))
+    gradList =[]
+    for i in res:
+      gradList.append(int(i))
     nStudents = int(request.data.get('amountOfStudents'))
-    [sigma, beta, alpha, lmbd] = particleSwarmOptimization(request, nStudents)
+    [sigma, beta, alpha, lmbd] = particleSwarmOptimization(request, nStudents, gradList)
     graph = cohortTrain(nStudents, sigma, beta, alpha)
     #schoolData = predictionType.objects.filter(UniqueID = uniqueID)
     newdata = predictionType(UniqueID=uniqueID, sigma=sigma, alpha=alpha,
