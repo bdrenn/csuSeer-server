@@ -10,6 +10,7 @@ def cost(x, nStudents):
     graderror2 = [0, 0, 0, 0, 0, 0]
     graderror3 = [0, 0, 0, 0, 0, 0]
     endsumerror = []
+    print(x)
     for j in range(0, len(x)):
         s = x[j, 0]
         b = x[j, 1]
@@ -47,26 +48,28 @@ def Markov(nStudents, s, b, a):
     lmbda = h*l*np.asarray([0, 4, 2, 2, 1, .5, .5, .5, .5, .5])
 
     # Preallocate Matrices
-    time = np.linspace(0, k, k+1)
+    row_size = k + 1
+    column_size = n + 1
+    time = np.linspace(0, k, row_size)
     time1 = np.linspace(0, k-1, k)
-    x = np.zeros((n+1, k+1), dtype=float)
-    x_migration = np.zeros((n+1, k+1), dtype=float)
-    x_DFW = np.zeros((n+1, k+1), dtype=float)
-    x_slowed = np.zeros((n+1, k+1), dtype=float)
-    x_Withdraw = np.zeros((n+1, k+1), dtype=float)
-    x_advance = np.zeros((n+1, k+1), dtype=float)
-    y = np.zeros((1, k+1), dtype=float)
-    retained = np.zeros((1, k+1), dtype=float)
-    graduated = np.zeros((1, k+1), dtype=float)
-    number_of_units_attempted = np.zeros((1, k+1), dtype=float)
-    number_of_units_DFWed = np.zeros((1, k+1), dtype=float)
-    cohortretention = np.zeros((1, k+1), dtype=float)
-    cohortpersistance = np.zeros((1, k+1), dtype=float)
-    cohortgrad = np.zeros((1, k+1), dtype=float)
+    x = np.zeros((column_size, row_size), dtype=float)
+    x_migration = np.zeros((column_size, row_size), dtype=float)
+    x_DFW = np.zeros((column_size, row_size), dtype=float)
+    x_slowed = np.zeros((column_size, row_size), dtype=float)
+    x_Withdraw = np.zeros((column_size, row_size), dtype=float)
+    x_advance = np.zeros((column_size, row_size), dtype=float)
+    y = np.zeros((1, row_size), dtype=float)
+    retained = np.zeros((1, row_size), dtype=float)
+    graduated = np.zeros((1, row_size), dtype=float)
+    number_of_units_attempted = np.zeros((1, row_size), dtype=float)
+    number_of_units_DFWed = np.zeros((1, row_size), dtype=float)
+    cohortretention = np.zeros((1, row_size), dtype=float)
+    cohortpersistance = np.zeros((1, row_size), dtype=float)
+    cohortgrad = np.zeros((1, row_size), dtype=float)
 
     ###STUDENT FLOW MODEL###
-    for t in range(1, k+1):  # TIME
-        for s in range(1, n+1):
+    for t in range(1, row_size):  # TIME
+        for s in range(1, column_size):
             if t <= 1:
                 x[s, t] = x_advance[s-1, t-1]+incoming[s] + \
                     x_DFW[s, t-1]+x_slowed[s, t-1]
@@ -119,4 +122,5 @@ def Markov(nStudents, s, b, a):
     y = y[0]
     grad = [graduated[3], graduated[5], graduated[7],
             graduated[9], graduated[11], graduated[13]]
+
     return grad
