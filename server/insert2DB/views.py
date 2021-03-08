@@ -17,9 +17,20 @@ from rest_framework.permissions import IsAuthenticated
 import json
 import numpy as np
 import io
+from django.core.mail import EmailMessage
 from django.core.mail import send_mail
 from django.conf import settings
 from django.contrib import messages
+
+from django.dispatch import receiver
+from django_rest_passwordreset.models import ResetPasswordToken
+from django_rest_passwordreset.views import get_password_reset_token_expiry_time
+from django_rest_passwordreset.signals import reset_password_token_created
+from rest_framework import parsers, renderers, status
+from .serializer import CustomTokenSerializer
+from django.template.loader import render_to_string
+from django.urls import reverse
+from datetime import timedelta
 
 """ Classes for the views that will be rendered in Angular.js
 
@@ -211,11 +222,12 @@ def trainModel(request):
     res = str(schoolData[0]).strip('][').split(', ')
     print(res)
     print(type(res))
-    gradList =[]
+    gradList = []
     for i in res:
-      gradList.append(int(i))
+        gradList.append(int(i))
     nStudents = int(request.data.get('amountOfStudents'))
-    [sigma, beta, alpha, lmbd] = particleSwarmOptimization(request, nStudents, gradList)
+    [sigma, beta, alpha, lmbd] = particleSwarmOptimization(
+        request, nStudents, gradList)
     graph = cohortTrain(nStudents, sigma, beta, alpha)
     #schoolData = predictionType.objects.filter(UniqueID = uniqueID)
     newdata = predictionType(UniqueID=uniqueID, sigma=sigma, alpha=alpha,
@@ -247,3 +259,90 @@ class testData(APIView):  # gradRate
         totalGraphs = {'NumOfFigures': len(data), 'Figures': data}
         #json_dump = json.dumps(totalGraphs, cls=NumpyEncoder)
         return Response(totalGraphs)
+
+
+@api_view(["POST"])
+def passwordResetRequest(request):
+    email_ = request.data.get('email')
+    if(User.objects.filter(email=email_).count()):
+        success = "Temporary response from backend!"
+        print("User exists..")
+        msg = EmailMessage('Request Callback',
+                           'Here is the message.', to=[email_])
+        msg.send()
+        return Response(something)
+
+    else:
+        success = "Not successful"
+        print("User does not exist..")
+    print("Request is: ")
+    print(request.data.get('email'))
+    return Response(success)
+
+
+class CustomPasswordResetView:
+    @receiver(reset_password_token_created)
+    def password_reset_token_created(sender, reset_password_token, *args, **kwargs):
+        """
+          Handles password reset tokens
+          When a token is created, an e-mail needs to be sent to the user
+        """
+        email_plaintext_message = "Follow the link to reset the password for your CSUSeer account, http://localhost:4200{}?token={} Thank you!".format(
+            reverse('account-reset-validate:reset-password-request'), reset_password_token.key)
+        msg = EmailMessage(
+            # title:
+            "Password Reset for {title}".format(title="CSUSeer"),
+            # message:
+            email_plaintext_message,
+            # from:
+            "csuseer2021@gmail.com",
+            # to:
+            [reset_password_token.user.email]
+        )
+        msg.send()
+
+
+class CustomPasswordTokenVerificationView(APIView):
+    """
+      An Api View which provides a method to verifiy that a given pw-reset token is valid before actually confirming the
+      reset.
+    """
+    throttle_classes = ()
+    permission_classes = ()
+    parser_classes = (parsers.FormParser,
+                      parsers.MultiPartParser, parsers.JSONParser,)
+    renderer_classes = (renderers.JSONRenderer,)
+    serializer_class = CustomTokenSerializer
+
+    def post(self, request, *args, **kwargs):
+        print("here")
+        print(request.data)
+        serializer = self.serializer_class(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        # After serializing we have the token
+        token = serializer.validated_data['token']
+
+        # get token validation time
+        password_reset_token_validation_time = get_password_reset_token_expiry_time()
+
+        # find token
+        reset_password_token = ResetPasswordToken.objects.filter(
+            key=token).first()
+
+        if reset_password_token is None:
+            return Response({'status': 'invalid'}, status=status.HTTP_404_NOT_FOUND)
+
+        # check expiry date
+        expiry_date = reset_password_token.created_at + \
+            timedelta(hours=password_reset_token_validation_time)
+
+        if timezone.now() > expiry_date:
+            # delete expired token
+            reset_password_token.delete()
+            return Response({'status': 'expired'}, status=status.HTTP_404_NOT_FOUND)
+
+        # check if user has password to change
+        if not reset_password_token.user.has_usable_password():
+            return Response({'status': 'irrelevant'})
+
+        return Response({'status': 'OK'})
