@@ -1,12 +1,13 @@
 import numpy as np
 import random as rm
+from .cohortModel import cohortTrain
 
 # include graduation, retention, # of students, and units
 
 
-def cost(x, nStudents,gradList):
+def cost(x, nStudents, gradList):
     #[0, 0, 1, 33, 195, 305]
-
+    # TODO
     UnivGrad10 = gradList
     graderror1 = [0, 0, 0, 0, 0, 0]
     graderror2 = [0, 0, 0, 0, 0, 0]
@@ -17,7 +18,8 @@ def cost(x, nStudents,gradList):
         b = x[j, 1]
         a = x[j, 2]
         #l = x[j,3]
-        grad = Markov(nStudents, s, b, a)
+        #grad = Markov(nStudents, s, b, a)
+        grad = cohortTrain(nStudents, s, b, a, isTransfer=False, isMarkov=True)
         for i in range(0, 5):
             graderror1[i] = np.power(
                 (UnivGrad10[i]-grad[i]), 2)/np.power((UnivGrad10[i]+.0001), 2)
@@ -30,102 +32,107 @@ def cost(x, nStudents,gradList):
     return endsumerror
 
 
-def Markov(nStudents, s, b, a):
-    n = 8  # number of semesters in road map
-    k = 15  # number of semesters to model
-    p = 0  # steady state trigger, if p=1 steady-state, p=0 only add students in year 1
-    h = 0  # college trigger, if h=1, only calc College, if =0, calc university
-    q = 0  # system shock trigger, if q=1, add shock semester 15, if q=0 just steady state
-    l = 0.58  # 0.025
+# def Markov(nStudents, s, b, a):
+#     # TODO n will be adjusted for transfer markov model n = 4
+#     n = 8  # number of semesters in road map
+#     # TODO model for less than 15 semester for transfer students
+#     k = 15  # number of semesters to model
+#     p = 0  # steady state trigger, if p=1 steady-state, p=0 only add students in year 1
+#     h = 0  # college trigger, if h=1, only calc College, if =0, calc university
+#     q = 0  # system shock trigger, if q=1, add shock semester 15, if q=0 just steady state
+#     l = 0.58  # 0.025
 
-    # Calibration Factors
-    ones = [0, 1, 1, 1, 1, 1, 1, 1, 1]
-    COEUnits = [0, 3.5, 3.5, 5, 5, 12, 12, 13, 13]
-    # [.47,0.01,.01,0.01,.47,0.01,.01,0.01];%number of student entering into each class at time k
-    incoming = nStudents*np.asarray([0, 1, 0, 0, 0, 0, 0, 0, 0, 0])
-    # University withdrawal rate (1-retained)for each class at time k
-    sigma = s*np.asarray(ones)
-    # DFW rate for each class at time k (need to repeat)
-    beta = b*np.asarray(ones)
-    # slowing factor to account for students taking less than 15 units per semester (need additional semester to complete class)
-    alpha = a*np.asarray(ones)
-    # could include "migrating" to allow calculation of grad in and out of COE
-    lmbda = h*l*np.asarray([0, 4, 2, 2, 1, .5, .5, .5, .5, .5])
+#     # TODO lists should be cut down to the right amount of semesters for transfer students
+#     # Calibration Factors
+#     ones = [0, 1, 1, 1, 1, 1, 1, 1, 1]
+#     COEUnits = [0, 3.5, 3.5, 5, 5, 12, 12, 13, 13]
+#     # [.47,0.01,.01,0.01,.47,0.01,.01,0.01];%number of student entering into each class at time k
+#     incoming = nStudents*np.asarray([0, 1, 0, 0, 0, 0, 0, 0, 0, 0])
+#     # University withdrawal rate (1-retained)for each class at time k
+#     sigma = s*np.asarray(ones)
+#     # DFW rate for each class at time k (need to repeat)
+#     beta = b*np.asarray(ones)
+#     # slowing factor to account for students taking less than 15 units per semester (need additional semester to complete class)
+#     alpha = a*np.asarray(ones)
+#     # could include "migrating" to allow calculation of grad in and out of COE
+#     lmbda = h*l*np.asarray([0, 4, 2, 2, 1, .5, .5, .5, .5, .5])
 
-    # Preallocate Matrices
-    row_size = k + 1
-    column_size = n + 1
-    time = np.linspace(0, k, row_size)
-    time1 = np.linspace(0, k-1, k)
-    x = np.zeros((column_size, row_size), dtype=float)
-    x_migration = np.zeros((column_size, row_size), dtype=float)
-    x_DFW = np.zeros((column_size, row_size), dtype=float)
-    x_slowed = np.zeros((column_size, row_size), dtype=float)
-    x_Withdraw = np.zeros((column_size, row_size), dtype=float)
-    x_advance = np.zeros((column_size, row_size), dtype=float)
-    y = np.zeros((1, row_size), dtype=float)
-    retained = np.zeros((1, row_size), dtype=float)
-    graduated = np.zeros((1, row_size), dtype=float)
-    number_of_units_attempted = np.zeros((1, row_size), dtype=float)
-    number_of_units_DFWed = np.zeros((1, row_size), dtype=float)
-    cohortretention = np.zeros((1, row_size), dtype=float)
-    cohortpersistance = np.zeros((1, row_size), dtype=float)
-    cohortgrad = np.zeros((1, row_size), dtype=float)
+#     # Preallocate Matrices
+#     row_size = k + 1
+#     column_size = n + 1
+#     time = np.linspace(0, k, row_size)
+#     time1 = np.linspace(0, k-1, k)
+#     x = np.zeros((column_size, row_size), dtype=float)
+#     x_migration = np.zeros((column_size, row_size), dtype=float)
+#     x_DFW = np.zeros((column_size, row_size), dtype=float)
+#     x_slowed = np.zeros((column_size, row_size), dtype=float)
+#     x_Withdraw = np.zeros((column_size, row_size), dtype=float)
+#     x_advance = np.zeros((column_size, row_size), dtype=float)
+#     y = np.zeros((1, row_size), dtype=float)
+#     retained = np.zeros((1, row_size), dtype=float)
+#     graduated = np.zeros((1, row_size), dtype=float)
+#     number_of_units_attempted = np.zeros((1, row_size), dtype=float)
+#     number_of_units_DFWed = np.zeros((1, row_size), dtype=float)
+#     cohortretention = np.zeros((1, row_size), dtype=float)
+#     cohortpersistance = np.zeros((1, row_size), dtype=float)
+#     cohortgrad = np.zeros((1, row_size), dtype=float)
 
-    ###STUDENT FLOW MODEL###
-    for t in range(1, row_size):  # TIME
-        for s in range(1, column_size):
-            if t <= 1:
-                x[s, t] = x_advance[s-1, t-1]+incoming[s] + \
-                    x_DFW[s, t-1]+x_slowed[s, t-1]
-            else:
-                # ask if we keep x[s,t]=x_advance[s-1,t-1]+incoming[s]*(1-np.mod(t+1,2))*p+x_DFW[s,t-1]+x_slowed[s,t-1]
-                x[s, t] = x_advance[s-1, t-1]+incoming[s] * \
-                    p+x_DFW[s, t-1]+x_slowed[s, t-1]
+#     ###STUDENT FLOW MODEL###
+#     for t in range(1, row_size):  # TIME
+#         for s in range(1, column_size):
+#             if t <= 1:
+#                 x[s, t] = x_advance[s-1, t-1]+incoming[s] + \
+#                     x_DFW[s, t-1]+x_slowed[s, t-1]
+#             else:
+#                 # ask if we keep x[s,t]=x_advance[s-1,t-1]+incoming[s]*(1-np.mod(t+1,2))*p+x_DFW[s,t-1]+x_slowed[s,t-1]
+#                 x[s, t] = x_advance[s-1, t-1]+incoming[s] * \
+#                     p+x_DFW[s, t-1]+x_slowed[s, t-1]
 
-            x_Withdraw[s, t] = x[s, t]*(sigma[s])
-            x_migration[s, t] = x[s, t]*(lmbda[s])*(1-sigma[s])
-            x_DFW[s, t] = x[s, t]*(beta[s])*(1-lmbda[s])*(1-sigma[s])
-            x_slowed[s, t] = x[s, t]*(alpha[s])*(1-sigma[s])*(1-beta[s])
-            x_advance[s, t] = x[s, t] * \
-                (1-sigma[s])*(1-lmbda[s])*(1-beta[s])*(1-alpha[s])
+#             x_Withdraw[s, t] = x[s, t]*(sigma[s])
+#             x_migration[s, t] = x[s, t]*(lmbda[s])*(1-sigma[s])
+#             x_DFW[s, t] = x[s, t]*(beta[s])*(1-lmbda[s])*(1-sigma[s])
+#             x_slowed[s, t] = x[s, t]*(alpha[s])*(1-sigma[s])*(1-beta[s])
+#             x_advance[s, t] = x[s, t] * \
+#                 (1-sigma[s])*(1-lmbda[s])*(1-beta[s])*(1-alpha[s])
 
-        y[0, t] = np.sum(x[:, t])  # number_of_students_enrolled
-        graduated[0, t] = np.sum(x_advance[s, 0:t+1])
-        number_of_units_attempted[0, t] = (1-h)*(np.sum(y[0, t])-np.sum(
-            x_slowed[:, t]))*15+(h)*np.sum((x[:, t]-x_slowed[:, t])*np.transpose(COEUnits))
-        number_of_units_DFWed[0, t] = (
-            1-h)*np.sum(x_DFW[:, t]*15)+h*np.sum(x_DFW[:, t]*np.transpose(COEUnits))
+#         y[0, t] = np.sum(x[:, t])  # number_of_students_enrolled
+#         graduated[0, t] = np.sum(x_advance[s, 0:t+1])
+#         number_of_units_attempted[0, t] = (1-h)*(np.sum(y[0, t])-np.sum(
+#             x_slowed[:, t]))*15+(h)*np.sum((x[:, t]-x_slowed[:, t])*np.transpose(COEUnits))
+#         number_of_units_DFWed[0, t] = (
+#             1-h)*np.sum(x_DFW[:, t]*15)+h*np.sum(x_DFW[:, t]*np.transpose(COEUnits))
 
-    ###COHORT CALCULATIONS###
-    if p <= 0:
-        t = 0
-        cohortretention[0, t] = y[0, t+1]/incoming[1]
-        cohortpersistance[0, t] = y[0, t+1]/incoming[1]
-        for t in range(1, k):
-            cohortpersistance[0, t] = y[0, t+1]/incoming[1]
-            cohortgrad[0, t] = graduated[0, t]/incoming[1]
-            cohortretention[0, t] = (graduated[0, t]+y[0, t+1])/incoming[1]
-        yr4gradrate = np.sum(x_advance[n, 1:9]) / \
-            incoming[1]*100  # in units of percent(%)
-        # in units of percent(%)
-        yr6gradrate = np.sum(x_advance[n, 1:13])/incoming[1]*100
-        # in units of percent(%)
-        endgradrate = np.sum(x_advance[n, 1:16])/incoming[1]*100
-        averageunitsperstudent = np.sum(
-            number_of_units_attempted)/np.sum(incoming)
+#     ###COHORT CALCULATIONS###
+#     if p <= 0:
+#         t = 0
+#         cohortretention[0, t] = y[0, t+1]/incoming[1]
+#         cohortpersistance[0, t] = y[0, t+1]/incoming[1]
+#         for t in range(1, k):
+#             cohortpersistance[0, t] = y[0, t+1]/incoming[1]
+#             cohortgrad[0, t] = graduated[0, t]/incoming[1]
+#             cohortretention[0, t] = (graduated[0, t]+y[0, t+1])/incoming[1]
+#         yr4gradrate = np.sum(x_advance[n, 1:9]) / \
+#             incoming[1]*100  # in units of percent(%)
+#         # in units of percent(%)
+#         yr6gradrate = np.sum(x_advance[n, 1:13])/incoming[1]*100
+#         # in units of percent(%)
+#         endgradrate = np.sum(x_advance[n, 1:16])/incoming[1]*100
+#         averageunitsperstudent = np.sum(
+#             number_of_units_attempted)/np.sum(incoming)
 
-    graduating = x_advance[n-1, :]
+#     graduating = x_advance[n-1, :]
 
-    DataTime = [2, 4, 6, 7, 8, 10, 12]
-    if h <= 0:  # college trigger, if h=1, only calc College, if =0, calc university
-        y1 = y
-        graduating1 = graduating
-        number_of_units_attempted1 = number_of_units_attempted
+#     #TODO datatime, review if needs to be taken out
+#     DataTime = [2, 4, 6, 7, 8, 10, 12]
+#     if h <= 0:  # college trigger, if h=1, only calc College, if =0, calc university
+#         y1 = y
+#         graduating1 = graduating
+#         number_of_units_attempted1 = number_of_units_attempted
 
-    graduated = graduated[0]
-    y = y[0]
-    grad = [graduated[3], graduated[5], graduated[7],
-            graduated[9], graduated[11], graduated[13]]
+#     graduated = graduated[0]
+#     y = y[0]
+#     # TODO have grad output every semester
+#     grad = [graduated[3], graduated[5], graduated[7],
+#             graduated[9], graduated[11], graduated[13]]
 
-    return grad
+#     return grad
