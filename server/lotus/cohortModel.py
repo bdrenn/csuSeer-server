@@ -2,7 +2,7 @@ import numpy as np
 import random as rm
 
 
-def cohortTrain(nStudents, s, b, a):
+def cohortTrain(nStudents, s, b, a, isTransfer, isMarkov):
     """
     Description:
     - Model a cohort of students as they progress through program
@@ -10,14 +10,20 @@ def cohortTrain(nStudents, s, b, a):
     - nstudents: number of students. EX: College of engineering 700 students
     - s: Determined by the pyswarm, decimal value of students that will leave everys semester.
     - b: Determined by pywarm, decimal value for the rate of students who don't advance becauyse of dfw
-    - a:
+    # - a:
     """
+
     # This is for when the model is already trained
     nStudents = int(nStudents)
-
-    # Inputs
-    n = 8  # number of semesters in road map
-    k = 15  # number of semesters to model (upper limit not worth modeling )
+    if isTransfer:
+        # Inputs
+        n = 4  # number of semesters in road map
+        # number of semesters to model (upper limit not worth modeling )
+        k = 15
+    else:
+        n = 8  # number of semesters in road map
+        # number of semesters to model (upper limit not worth modeling )
+        k = 15
     # steady state trigger, if p=1 steady-state, p=0 only add students in year 1 	(boolean)
     p = 0
 
@@ -173,20 +179,28 @@ def cohortTrain(nStudents, s, b, a):
         graduating1 = graduating
         number_of_units_attempted1 = number_of_units_attempted
 
-    # ASK can be add a flag that either returns the data with jason or the grad
-    data = {'figure1': {'x-axis': time, 'uGrad': (y[0, :], '#000000'), 'coeGrad': (graduating, '#E69F00'),
-                        'description': 'figure1'},
-            'figure2': {'x-axis': time, 'f1': (x[1, :], '#000000'), 'f2': (x[2, :], '#E69F00'),
-                        's1': (x[3, :], '#56B4E9'), 's2': (x[4, :], '#009E73'), 'j1': (x[5, :], '#F0E442'),
-                        'j2': (x[6, :], '#0072B2'), 'se1': (x[7, :], '#D55E00'), 'se2': (x[8, :], '#CC79A7'),
-                        'description': 'figure2'},
-            'figure3': {'x-axis': time, 'persistance': (cohortpersistance[0], '#000000'),
-                        'retention': (cohortretention[0], '#E69F00'), 'graduation': (cohortgrad[0], '#56B4E9'),
-                        'description': 'figure3'},
-            'figure4': {'x-axis': time, '0-29units': ((x[1, :] + x[2, :]) / 2, '#000000'),
-                        '30-59units': ((x[3, :] + x[4, :]) / 2, '#E69F00'),
-                        '60-89units': ((x[5, :] + x[6, :]) / 2, '#56B4E9'),
-                        '90-119units': ((x[7, :] + x[8, :]) / 2, '#009E73'), 'description': 'figure4'}}
+    data = None
+    if isMarkov:
+        graduated = graduated[0]
+        y = y[0]
+        # TODO have grad output every semester
+        data = [graduated[3], graduated[5], graduated[7],
+                graduated[9], graduated[11], graduated[13]]
+    else:
+        # ASK can be add a flag that either returns the data with jason or the grad
+        data = {'figure1': {'x-axis': time, 'uGrad': (y[0, :], '#000000'), 'coeGrad': (graduating, '#E69F00'),
+                            'description': 'figure1'},
+                'figure2': {'x-axis': time, 'f1': (x[1, :], '#000000'), 'f2': (x[2, :], '#E69F00'),
+                            's1': (x[3, :], '#56B4E9'), 's2': (x[4, :], '#009E73'), 'j1': (x[5, :], '#F0E442'),
+                            'j2': (x[6, :], '#0072B2'), 'se1': (x[7, :], '#D55E00'), 'se2': (x[8, :], '#CC79A7'),
+                            'description': 'figure2'},
+                'figure3': {'x-axis': time, 'persistance': (cohortpersistance[0], '#000000'),
+                            'retention': (cohortretention[0], '#E69F00'), 'graduation': (cohortgrad[0], '#56B4E9'),
+                            'description': 'figure3'},
+                'figure4': {'x-axis': time, '0-29units': ((x[1, :] + x[2, :]) / 2, '#000000'),
+                            '30-59units': ((x[3, :] + x[4, :]) / 2, '#E69F00'),
+                            '60-89units': ((x[5, :] + x[6, :]) / 2, '#56B4E9'),
+                            '90-119units': ((x[7, :] + x[8, :]) / 2, '#009E73'), 'description': 'figure4'}}
 
     return data
 

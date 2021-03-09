@@ -108,6 +108,21 @@ def sendEmail(request):
 def createUser(request):
     user = User.objects.create_user(username=request.data.get(
         'username'), email=request.data.get('email'), password=request.data.get('password'))
+
+    _email = request.data.get('email')
+    # Send email to new registered user
+    msg = EmailMessage(
+        # title:
+        "Welcome to the CSUSeer platform",
+        # message:
+        email_plaintext_message,
+        # from:
+        "csuseer2021@gmail.com",
+        # to:
+        [_email]
+    )
+    msg.send()
+
     success = "User created successfully"
     return Response(success)
 
@@ -198,7 +213,6 @@ class multipleData(APIView):
 @api_view(["POST"])
 def uploadFile(request):
     # HigherEdDataBase is the raw records provided by the users
-    # DONE TODO insert json with upload data to be saved in HigherEdData
     print(request.data.get('data'))
     newData = HigherEdDatabase(data=request.data.get('data'), collegeName=request.data.get('collegeName'), departmentName=request.data.get('departmentName'), universityName=request.data.get(
         'universityName'), cohortDate=request.data.get('cohortDate'), amountOfStudents=request.data.get('amountOfStudents'), pubDate=timezone.now())
@@ -228,7 +242,8 @@ def trainModel(request):
     nStudents = int(request.data.get('amountOfStudents'))
     [sigma, beta, alpha, lmbd] = particleSwarmOptimization(
         request, nStudents, gradList)
-    graph = cohortTrain(nStudents, sigma, beta, alpha)
+    graph = cohortTrain(nStudents, sigma, beta, alpha,
+                        isTransfer=False, isMarkov=False)
     #schoolData = predictionType.objects.filter(UniqueID = uniqueID)
     newdata = predictionType(UniqueID=uniqueID, sigma=sigma, alpha=alpha,
                              beta=beta, lmbda=lmbd, numberOfStudents=nStudents, pubDate=timezone.now())
@@ -255,7 +270,8 @@ class NumpyEncoder(json.JSONEncoder):
 class testData(APIView):  # gradRate
     # Send a schools test data to the oracle
     def get(self, request, incomingStudents):
-        data = cohortTrain(incomingStudents, 0.02, 0.05, 0.15)
+        data = cohortTrain(incomingStudents, 0.02, 0.05,
+                           0.15, isTransfer=False, isMarkov=False)
         totalGraphs = {'NumOfFigures': len(data), 'Figures': data}
         #json_dump = json.dumps(totalGraphs, cls=NumpyEncoder)
         return Response(totalGraphs)
@@ -315,7 +331,6 @@ class CustomPasswordTokenVerificationView(APIView):
     serializer_class = CustomTokenSerializer
 
     def post(self, request, *args, **kwargs):
-        print("here")
         print(request.data)
         serializer = self.serializer_class(data=request.data)
         serializer.is_valid(raise_exception=True)
