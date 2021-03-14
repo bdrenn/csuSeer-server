@@ -24,12 +24,10 @@ def particleSwarmOptimization(request, nStudents, gradList):
         n_particles=10, dimensions=4, options=options, bounds=bounds)
 
     # now run the optimization
-    bestcost, pos = optimizer.optimize(cost, 100, nStudents=nStudents, gradList=gradList)
-    plot_cost_history(cost_history=optimizer.cost_history)
-    plt.show()
+    bestcost, pos = optimizer.optimize(
+        cost, 100, nStudents=nStudents, gradList=gradList)
 
     # if(bestcost - 1 > 0.05):
     #     print("Bestcost - 1")
     #     particleSwarmOptimization(request, nStudents)
-
     return pos

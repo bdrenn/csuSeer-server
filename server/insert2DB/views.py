@@ -36,10 +36,10 @@ from datetime import timedelta
 
     These files are saved in the static folder and then they are accessed
     through the template folder which as the index.html file.
-    
+
     Args:
         request (object): The object sent with the request
-        kwargs (dictionary): The different variables from angular.js  
+        kwargs (dictionary): The different variables from angular.js
     Returns:
         a render request to the index.html file as mentioned above
 """
@@ -77,13 +77,13 @@ class UploadView(APIView):
 
 """ Classes for the routes that will be used by the frontend to do some action
 
-    These routes will need to be locked behind various permissions and at the very 
+    These routes will need to be locked behind various permissions and at the very
     least will need json web token authenication (from the IsAuthenticated library).
-    
+
     Args:
         request (object): The object sent with the request
-        incomingstudents (string): Amount of students incoming for a single semester 
-    Returns:
+        incomingstudents (string): Amount of students incoming for a single semester
+    Returns:pip i
         a response to the frontend with either a success message or a needed variable
 """
 
@@ -95,7 +95,7 @@ def sendEmail(request):
     subject = 'Email from backend of csuMarkov'
     message = 'This email was sent from the back end.\n Hehe I am glad it works.'
     from_email = settings.EMAIL_HOST_USER
-    #to_list = ['lisa.star@csulb.edu', 'mehrdad.aliasgari@csulb.edu']
+    # to_list = ['lisa.star@csulb.edu', 'mehrdad.aliasgari@csulb.edu']
     to_list = ['diegocburela@gmail.com']
     send_mail(subject, message, from_email, to_list, fail_silently=False)
     success = "User emailed successfully"
@@ -109,19 +109,19 @@ def createUser(request):
     user = User.objects.create_user(username=request.data.get(
         'username'), email=request.data.get('email'), password=request.data.get('password'))
 
-    _email = request.data.get('email')
-    # Send email to new registered user
-    msg = EmailMessage(
-        # title:
-        "Welcome to the CSUSeer platform",
-        # message:
-        email_plaintext_message,
-        # from:
-        "csuseer2021@gmail.com",
-        # to:
-        [_email]
-    )
-    msg.send()
+    # _email = request.data.get('email')
+    # # Send email to new registered user
+    # msg = EmailMessage(
+    #     # title:
+    #     "Welcome to the CSUSeer platform",
+    #     # message:
+    #     email_plaintext_message,
+    #     # from:
+    #     "csuseer2021@gmail.com",
+    #     # to:
+    #     [_email]
+    # )
+    # msg.send()
 
     success = "User created successfully"
     return Response(success)
@@ -219,7 +219,7 @@ def uploadFile(request):
     newData.save()
     # MAKING THE "BLANK" MODEL FOR WHEN WE WANT TO SAVE PREDICTIONS
     uniqueID = newData.id
-    #blankPrediction = predictionType(UniqueID = uniqueID)
+    # blankPrediction = predictionType(UniqueID = uniqueID)
     # blankPrediction.save()
     return Response(uniqueID)
 
@@ -230,15 +230,7 @@ def uploadFile(request):
 def trainModel(request):
     uniqueID = request.data.get('uniqueID')
     schoolData = HigherEdDatabase.objects.filter(id=uniqueID)
-    print(type(schoolData))
-    print(type(schoolData[0]))
-    print(type(str(schoolData[0])))
-    res = str(schoolData[0]).strip('][').split(', ')
-    print(res)
-    print(type(res))
-    gradList = []
-    for i in res:
-        gradList.append(int(i))
+    gradList = eval(schoolData[0].data)
     nStudents = int(request.data.get('amountOfStudents'))
     [sigma, beta, alpha, lmbd] = particleSwarmOptimization(
         request, nStudents, gradList)
@@ -251,7 +243,7 @@ def trainModel(request):
     return Response(graph)
 
 
-@api_view(["POST"])
+@ api_view(["POST"])
 def saveModel(request):
     # ACTUALLY SAVE THE MODEL DATA HERE
     success = "need to actually change this to happen when success training"
@@ -273,11 +265,11 @@ class testData(APIView):  # gradRate
         data = cohortTrain(incomingStudents, 0.02, 0.05,
                            0.15, isTransfer=False, isMarkov=False)
         totalGraphs = {'NumOfFigures': len(data), 'Figures': data}
-        #json_dump = json.dumps(totalGraphs, cls=NumpyEncoder)
+        # json_dump = json.dumps(totalGraphs, cls=NumpyEncoder)
         return Response(totalGraphs)
 
 
-@api_view(["POST"])
+@ api_view(["POST"])
 def passwordResetRequest(request):
     email_ = request.data.get('email')
     if(User.objects.filter(email=email_).count()):
@@ -297,7 +289,7 @@ def passwordResetRequest(request):
 
 
 class CustomPasswordResetView:
-    @receiver(reset_password_token_created)
+    @ receiver(reset_password_token_created)
     def password_reset_token_created(sender, reset_password_token, *args, **kwargs):
         """
           Handles password reset tokens

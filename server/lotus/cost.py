@@ -7,11 +7,13 @@ from .cohortModel import cohortTrain
 
 def cost(x, nStudents, gradList):
     #[0, 0, 1, 33, 195, 305]
-    # TODO
-    UnivGrad10 = gradList
+    # data = [graduated[3], graduated[5], graduated[7],
+    #     graduated[9], graduated[11], graduated[13]]
+    UnivGrad10 = gradList["GRADUATION COUNT"]
     graderror1 = [0, 0, 0, 0, 0, 0]
-    graderror2 = [0, 0, 0, 0, 0, 0]
-    graderror3 = [0, 0, 0, 0, 0, 0]
+    graderror1 = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    graderror2 = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    graderror3 = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
     endsumerror = []
     for j in range(0, len(x)):
         s = x[j, 0]
