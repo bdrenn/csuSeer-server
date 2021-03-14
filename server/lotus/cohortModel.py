@@ -186,6 +186,8 @@ def cohortTrain(nStudents, s, b, a, isTransfer, isMarkov):
         # TODO have grad output every semester
         data = [graduated[3], graduated[5], graduated[7],
                 graduated[9], graduated[11], graduated[13]]
+        # data = [graduated[1], graduated[2], graduated[3], graduated[4], graduated[5], graduated[6],
+        #         graduated[7], graduated[8], graduated[9], graduated[10], graduated[11], graduated[12], graduated[13]]
     else:
         # ASK can be add a flag that either returns the data with jason or the grad
         data = {'figure1': {'x-axis': time, 'uGrad': (y[0, :], '#000000'), 'coeGrad': (graduating, '#E69F00'),
@@ -201,7 +203,6 @@ def cohortTrain(nStudents, s, b, a, isTransfer, isMarkov):
                             '30-59units': ((x[3, :] + x[4, :]) / 2, '#E69F00'),
                             '60-89units': ((x[5, :] + x[6, :]) / 2, '#56B4E9'),
                             '90-119units': ((x[7, :] + x[8, :]) / 2, '#009E73'), 'description': 'figure4'}}
-
     return data
 
 
