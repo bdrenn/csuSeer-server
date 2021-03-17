@@ -16,8 +16,6 @@ def particleSwarmOptimization(request, nStudents, gradList):
     x_max = 1 * np.ones(4)
     x_min = 0 * x_max
     bounds = (x_min, x_max)
-    print("inside pso")
-    print(gradList)
     # instatiate the optimizer
     options = {'c1': .5, 'c2': .6, 'w': .8}
     optimizer = GlobalBestPSO(
