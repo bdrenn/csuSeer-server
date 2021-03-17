@@ -18,14 +18,13 @@ def cohortTrain(nStudents, s, b, a, isTransfer, isMarkov):
     if isTransfer:
         # Inputs
         n = 4  # number of semesters in road map
-        # number of semesters to model (upper limit not worth modeling )
-        k = 15
     else:
         n = 8  # number of semesters in road map
-        # number of semesters to model (upper limit not worth modeling )
-        k = 15
+
+    # number of semesters to model (upper limit not worth modeling )
+    k = 15
     # steady state trigger, if p=1 steady-state, p=0 only add students in year 1 	(boolean)
-    p = 0
+    p = 1
 
     # boolena to calculate the number of units in college or units in University
     h = 0  # college trigger, if h=1, only calc College, if =0, calc university
@@ -183,13 +182,9 @@ def cohortTrain(nStudents, s, b, a, isTransfer, isMarkov):
     if isMarkov:
         graduated = graduated[0]
         y = y[0]
-        # TODO have grad output every semester
-        data = [graduated[3], graduated[5], graduated[7],
-                graduated[9], graduated[11], graduated[13]]
-        # data = [graduated[1], graduated[2], graduated[3], graduated[4], graduated[5], graduated[6],
-        #         graduated[7], graduated[8], graduated[9], graduated[10], graduated[11], graduated[12], graduated[13]]
+        data = [graduated[1], graduated[2], graduated[3], graduated[4], graduated[5], graduated[6],
+                graduated[7], graduated[8], graduated[9], graduated[10], graduated[11], graduated[12], graduated[13]]
     else:
-        # ASK can be add a flag that either returns the data with jason or the grad
         data = {'figure1': {'x-axis': time, 'uGrad': (y[0, :], '#000000'), 'coeGrad': (graduating, '#E69F00'),
                             'description': 'figure1'},
                 'figure2': {'x-axis': time, 'f1': (x[1, :], '#000000'), 'f2': (x[2, :], '#E69F00'),
