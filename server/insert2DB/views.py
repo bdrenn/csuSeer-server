@@ -214,8 +214,8 @@ class multipleData(APIView):
 def uploadFile(request):
     # HigherEdDataBase is the raw records provided by the users
     print(request.data.get('data'))
-    newData = HigherEdDatabase(data=request.data.get('data'), collegeName=request.data.get('collegeName'), departmentName=request.data.get('departmentName'), universityName=request.data.get(
-        'universityName'), cohortDate=request.data.get('cohortDate'), amountOfStudents=request.data.get('amountOfStudents'), pubDate=timezone.now())
+    newData = HigherEdDatabase(data=request.data.get('data'), yearTerm=request.data.get('yearTermF'), academicType=request.data.get('academicTypeF'), studentType=request.data.get(
+        'studentTypeF'), cohortDate=request.data.get('cohortDate'), amountOfStudents=request.data.get('amountOfStudents'), academicLabel=request.data.get('academicLabel'), pubDate=timezone.now())
     newData.save()
     # MAKING THE "BLANK" MODEL FOR WHEN WE WANT TO SAVE PREDICTIONS
     uniqueID = newData.id
@@ -236,7 +236,7 @@ def trainModel(request):
         request, nStudents, gradList)
     graph = cohortTrain(nStudents, sigma, beta, alpha,
                         isTransfer=False, isMarkov=False)
-    #schoolData = predictionType.objects.filter(UniqueID = uniqueID)
+    # schoolData = predictionType.objects.filter(UniqueID = uniqueID)
     newdata = predictionType(UniqueID=uniqueID, sigma=sigma, alpha=alpha,
                              beta=beta, lmbda=lmbd, numberOfStudents=nStudents, pubDate=timezone.now())
     newdata.save()
@@ -267,6 +267,38 @@ class testData(APIView):  # gradRate
         totalGraphs = {'NumOfFigures': len(data), 'Figures': data}
         # json_dump = json.dumps(totalGraphs, cls=NumpyEncoder)
         return Response(totalGraphs)
+
+# Getting the options for charts
+
+
+class getAcademicLabel(APIView):
+    def get(self, request):
+        queryResult = HigherEdDatabase.objects.filter().values('academicLabel').distinct()
+        print(queryResult)
+        # data = HigherEdDatabase.objects.filter(studentType=studentType)
+        return Response(list(queryResult))
+
+
+class getYearTerm(APIView):
+    # permission_classes = (IsAuthenticated, )
+    def get(self, request, getStudentType):
+        queryResult = HigherEdDatabase.objects.filter(
+            studentType=getStudentType).values('yearTerm').distinct()
+        # data = HigherEdDatabase.objects.filter(studentType=studentType)
+        return Response(list(queryResult))
+
+
+class getAcademicType(APIView):
+    # permission_classes = (IsAuthenticated, )
+    def get(self, request, getStudentType, getYearTerm, getAcademicLabel):
+        queryResult = HigherEdDatabase.objects.filter(studentType=getStudentType,
+                                                      yearTerm=getYearTerm, academicLabel=getAcademicLabel).values('academicType').distinct()
+        # data = HigherEdDatabase.objects.filter(studentType=studentType)
+        print(list(queryResult))
+        return Response(list(queryResult))
+
+
+# Getting multiple
 
 
 @ api_view(["POST"])

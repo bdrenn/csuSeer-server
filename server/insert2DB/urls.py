@@ -62,6 +62,18 @@ urlpatterns = [
     # Path for getting all permissions
     path('getpermission/', views.getPerm, name='getPerm'),
 
+    # Path for getting all academic labels
+    path('getAcademicLabel/',
+         views.getAcademicLabel.as_view(), name='getAcademicLabel'),
+
+    # Path for getting all student types based on year terms
+    path('getYearTerm/<str:getStudentType>/',
+         views.getYearTerm.as_view(), name='getYearTerm'),
+
+    # Path for getting all the academic type based on previos selections
+    path('getAcademicType/<str:getStudentType>/<str:getYearTerm>/<str:getAcademicLabel>/',
+         views.getAcademicType.as_view(), name='getAcademicType'),
+
     # Path for password reset
     path('account-reset-validate/verify-token/', views.CustomPasswordTokenVerificationView.as_view(),
          name='password_reset'),
