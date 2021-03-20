@@ -177,15 +177,22 @@ def cohortTrain(nStudents, s, b, a, isTransfer, isMarkov):
         graduating1 = graduating
         number_of_units_attempted1 = number_of_units_attempted
 
-    data = None
+    data = {}
     if isMarkov:
         graduated = graduated[0]
+        cohortpersistance = cohortpersistance[0]
         y = y[0]
-        # TODO have grad output every semester
-        # data = [graduated[3], graduated[5], graduated[7],
-        #         graduated[9], graduated[11], graduated[13]]
-        data = [graduated[1], graduated[2], graduated[3], graduated[4], graduated[5], graduated[6],
-                graduated[7], graduated[8], graduated[9], graduated[10], graduated[11], graduated[12], graduated[13]]
+        # print('cohortpersistance')
+        # print(cohortpersistance)
+        # print('graduated')
+        # print(graduated)
+        data['graduated_data'] = [graduated[0], graduated[1], graduated[2], graduated[3], graduated[4], graduated[5],
+                                  graduated[6], graduated[7], graduated[8], graduated[9], graduated[10], graduated[11], graduated[12]]
+        data['persistance_data'] = [cohortpersistance[0], cohortpersistance[1], cohortpersistance[2], cohortpersistance[3], cohortpersistance[4], cohortpersistance[5],
+                                    cohortpersistance[6], cohortpersistance[7], cohortpersistance[8], cohortpersistance[9], cohortpersistance[10], cohortpersistance[11], cohortpersistance[12]]
+        # data = [graduated[1], graduated[2], graduated[3], graduated[4], graduated[5], graduated[6],
+        #         graduated[7], graduated[8], graduated[9], graduated[10], graduated[11], graduated[12], graduated[13]]
+
     else:
         data = {'figure1': {'x-axis': time, 'uGrad': (y[0, :], '#000000'), 'coeGrad': (graduating, '#E69F00'),
                             'description': 'figure1'},
