@@ -214,8 +214,8 @@ class multipleData(APIView):
 def uploadFile(request):
     # HigherEdDataBase is the raw records provided by the users
     print(request.data.get('data'))
-    newData = HigherEdDatabase(data=request.data.get('data'), collegeName=request.data.get('collegeName'), departmentName=request.data.get('departmentName'), universityName=request.data.get(
-        'universityName'), cohortDate=request.data.get('cohortDate'), amountOfStudents=request.data.get('amountOfStudents'), pubDate=timezone.now())
+    newData = HigherEdDatabase(data=request.data.get('data'), yearTerm=request.data.get('yearTermF'), academicType=request.data.get('academicTypeF'), studentType=request.data.get(
+        'studentTypeF'), cohortDate=request.data.get('cohortDate'), amountOfStudents=request.data.get('amountOfStudents'), academicLabel=request.data.get('academicLabel'), pubDate=timezone.now())
     newData.save()
     # MAKING THE "BLANK" MODEL FOR WHEN WE WANT TO SAVE PREDICTIONS
     uniqueID = newData.id
@@ -230,13 +230,15 @@ def uploadFile(request):
 def trainModel(request):
     uniqueID = request.data.get('uniqueID')
     schoolData = HigherEdDatabase.objects.filter(id=uniqueID)
+    print("schooldata[0].data")
+    print(schoolData[0].data)
     gradList = eval(schoolData[0].data)
     nStudents = int(request.data.get('amountOfStudents'))
     [sigma, beta, alpha, lmbd] = particleSwarmOptimization(
         request, nStudents, gradList)
     graph = cohortTrain(nStudents, sigma, beta, alpha,
                         isTransfer=False, isMarkov=False)
-    #schoolData = predictionType.objects.filter(UniqueID = uniqueID)
+    # schoolData = predictionType.objects.filter(UniqueID = uniqueID)
     newdata = predictionType(UniqueID=uniqueID, sigma=sigma, alpha=alpha,
                              beta=beta, lmbda=lmbd, numberOfStudents=nStudents, pubDate=timezone.now())
     newdata.save()
@@ -267,6 +269,72 @@ class testData(APIView):  # gradRate
         totalGraphs = {'NumOfFigures': len(data), 'Figures': data}
         # json_dump = json.dumps(totalGraphs, cls=NumpyEncoder)
         return Response(totalGraphs)
+
+# Getting the options for charts
+
+
+class getAcademicLabel(APIView):
+    def get(self, request, getStudentType, getYearTerm):
+        queryResult = HigherEdDatabase.objects.filter(
+            studentType=getStudentType, yearTerm=getYearTerm).values('academicLabel').distinct()
+        print(queryResult)
+        # data = HigherEdDatabase.objects.filter(studentType=studentType)
+        return Response(list(queryResult))
+
+
+class getYearTerm(APIView):
+    # permission_classes = (IsAuthenticated, )
+    def get(self, request, getStudentType):
+        queryResult = HigherEdDatabase.objects.filter(
+            studentType=getStudentType).values('yearTerm').distinct()
+        # data = HigherEdDatabase.objects.filter(studentType=studentType)
+        return Response(list(queryResult))
+
+
+class getAcademicType(APIView):
+    # permission_classes = (IsAuthenticated, )
+    def get(self, request, getStudentType, getYearTerm, getAcademicLabel):
+        queryResult = HigherEdDatabase.objects.filter(studentType=getStudentType,
+                                                      yearTerm=getYearTerm, academicLabel=getAcademicLabel).values('academicType').distinct()
+        # data = HigherEdDatabase.objects.filter(studentType=studentType)
+        print(list(queryResult))
+        return Response(list(queryResult))
+
+# Getting the prediction data and student numbers based on the user's input
+
+
+class getPredictionData(APIView):
+    def get(self, request, getStudentType, getYearTerm, getAcademicType):
+        queryResult = HigherEdDatabase.objects.filter(studentType=getStudentType,
+                                                      yearTerm=getYearTerm, academicType=getAcademicType).values('id')
+        queryResultList = list(queryResult)
+        higherEdId = ""
+        print(len(queryResultList))
+        if len(queryResultList) > 0:
+            # Work on max for the id
+            higherEdId = queryResultList[-1]['id']
+        prediction = predictionType.objects.filter(UniqueID=higherEdId)
+        # if len(queryPrediction) > 0:
+        #     prediction = max(list(queryPrediction))
+        data = cohortTrain(prediction[0].numberOfStudents, prediction[0].sigma,
+                           prediction[0].alpha, prediction[0].beta, isTransfer=False, isMarkov=False)
+        totalGraphs = {'NumOfFigures': len(data), 'Figures': data, 'MetaData': {
+            'numberOfStudents': prediction[0].numberOfStudents, 'sigma': prediction[0].sigma, 'alpha': prediction[0].alpha, 'beta': prediction[0].beta}}
+        return Response(totalGraphs)
+
+
+# Gets the graph data for the charts with the inputed data when manipulating a cohort
+class getModifiedChartCohort(APIView):
+    def get(self, request, numberOfStudents, sigma, alpha, beta, steady):
+        tempBool = True if steady == "True" else False
+        data = cohortTrain(int(numberOfStudents), float(sigma), float(alpha),
+                           float(beta), isTransfer=False, isMarkov=False, steadyStateTrigger=tempBool)
+
+        totalGraphs = {'NumOfFigures': len(data), 'Figures': data, 'MetaData': {
+            'numberOfStudents': numberOfStudents, 'sigma': sigma, 'alpha': alpha, 'beta': beta}}
+        return Response(totalGraphs)
+
+# This class we get a graph depending on the value given to the steady state (p)
 
 
 @ api_view(["POST"])
