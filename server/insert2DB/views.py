@@ -230,6 +230,8 @@ def uploadFile(request):
 def trainModel(request):
     uniqueID = request.data.get('uniqueID')
     schoolData = HigherEdDatabase.objects.filter(id=uniqueID)
+    print("schooldata[0].data")
+    print(schoolData[0].data)
     gradList = eval(schoolData[0].data)
     nStudents = int(request.data.get('amountOfStudents'))
     [sigma, beta, alpha, lmbd] = particleSwarmOptimization(
@@ -272,8 +274,9 @@ class testData(APIView):  # gradRate
 
 
 class getAcademicLabel(APIView):
-    def get(self, request):
-        queryResult = HigherEdDatabase.objects.filter().values('academicLabel').distinct()
+    def get(self, request, getStudentType, getYearTerm):
+        queryResult = HigherEdDatabase.objects.filter(
+            studentType=getStudentType, yearTerm=getYearTerm).values('academicLabel').distinct()
         print(queryResult)
         # data = HigherEdDatabase.objects.filter(studentType=studentType)
         return Response(list(queryResult))
@@ -297,8 +300,41 @@ class getAcademicType(APIView):
         print(list(queryResult))
         return Response(list(queryResult))
 
+# Getting the prediction data and student numbers based on the user's input
 
-# Getting multiple
+
+class getPredictionData(APIView):
+    def get(self, request, getStudentType, getYearTerm, getAcademicType):
+        queryResult = HigherEdDatabase.objects.filter(studentType=getStudentType,
+                                                      yearTerm=getYearTerm, academicType=getAcademicType).values('id')
+        queryResultList = list(queryResult)
+        higherEdId = ""
+        print(len(queryResultList))
+        if len(queryResultList) > 0:
+            # Work on max for the id
+            higherEdId = queryResultList[-1]['id']
+        prediction = predictionType.objects.filter(UniqueID=higherEdId)
+        # if len(queryPrediction) > 0:
+        #     prediction = max(list(queryPrediction))
+        data = cohortTrain(prediction[0].numberOfStudents, prediction[0].sigma,
+                           prediction[0].alpha, prediction[0].beta, isTransfer=False, isMarkov=False)
+        totalGraphs = {'NumOfFigures': len(data), 'Figures': data, 'MetaData': {
+            'numberOfStudents': prediction[0].numberOfStudents, 'sigma': prediction[0].sigma, 'alpha': prediction[0].alpha, 'beta': prediction[0].beta}}
+        return Response(totalGraphs)
+
+
+# Gets the graph data for the charts with the inputed data when manipulating a cohort
+class getModifiedChartCohort(APIView):
+    def get(self, request, numberOfStudents, sigma, alpha, beta, steady):
+        tempBool = True if steady == "True" else False
+        data = cohortTrain(int(numberOfStudents), float(sigma), float(alpha),
+                           float(beta), isTransfer=False, isMarkov=False, steadyStateTrigger=tempBool)
+
+        totalGraphs = {'NumOfFigures': len(data), 'Figures': data, 'MetaData': {
+            'numberOfStudents': numberOfStudents, 'sigma': sigma, 'alpha': alpha, 'beta': beta}}
+        return Response(totalGraphs)
+
+# This class we get a graph depending on the value given to the steady state (p)
 
 
 @ api_view(["POST"])
