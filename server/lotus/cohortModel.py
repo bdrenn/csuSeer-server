@@ -2,7 +2,7 @@ import numpy as np
 import random as rm
 
 
-def cohortTrain(nStudents, s, b, a, isTransfer, isMarkov):
+def cohortTrain(nStudents, s, b, a, isTransfer, isMarkov, steadyStateTrigger=False):
     """
     Description:
     - Model a cohort of students as they progress through program
@@ -15,15 +15,13 @@ def cohortTrain(nStudents, s, b, a, isTransfer, isMarkov):
 
     # This is for when the model is already trained
     nStudents = int(nStudents)
-    if isTransfer:
-        # Inputs
-        n = 4  # number of semesters in road map
-    else:
-        n = 8  # number of semesters in road map
+    # n number of semesters in road map
+    n = 4 if isTransfer else 8
+
     # number of semesters to model (upper limit not worth modeling )
     k = 15
     # steady state trigger, if p=1 steady-state, p=0 only add students in year 1 	(boolean)
-    p = 0
+    p = 1 if steadyStateTrigger else 0
 
     # boolena to calculate the number of units in college or units in University
     h = 0  # college trigger, if h=1, only calc College, if =0, calc university
