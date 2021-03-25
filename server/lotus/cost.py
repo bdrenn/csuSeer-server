@@ -5,10 +5,10 @@ from .cohortModel import cohortTrain
 # include graduation, retention, # of students, and units
 
 
-def cost(x, nStudents, gradList):
+def cost(x, nStudents, excelData):
     # [0, 0, 1, 33, 195, 305]
-    UnivGrad10 = gradList["GRADUATION COUNT"]
-    UnivPersis10 = gradList["PERSIST COUNT"]
+    UnivGrad10 = excelData["GRADUATION COUNT"]
+    UnivPersis10 = excelData["PERSIST COUNT"]
     graderror1 = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
     persistanterro1 = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
     endsumerror = []

@@ -230,14 +230,12 @@ def uploadFile(request):
 def trainModel(request):
     uniqueID = request.data.get('uniqueID')
     schoolData = HigherEdDatabase.objects.filter(id=uniqueID)
-    print("schooldata[0].data")
-    print(schoolData[0].data)
-    gradList = eval(schoolData[0].data)
+    excelData = eval(schoolData[0].data)
     nStudents = int(request.data.get('amountOfStudents'))
     [sigma, beta, alpha, lmbd] = particleSwarmOptimization(
-        request, nStudents, gradList)
+        request, nStudents, excelData)
     graph = cohortTrain(nStudents, sigma, beta, alpha,
-                        isTransfer=False, isMarkov=False, steadyStateTrigger=False, excelData={})
+                        isTransfer=False, isMarkov=False, steadyStateTrigger=False, excelData=excelData)
     # schoolData = predictionType.objects.filter(UniqueID = uniqueID)
     newdata = predictionType(UniqueID=uniqueID, sigma=sigma, alpha=alpha,
                              beta=beta, lmbda=lmbd, numberOfStudents=nStudents, pubDate=timezone.now())
@@ -319,20 +317,24 @@ class getPredictionData(APIView):
         #     prediction = max(list(queryPrediction))
         excelData = HigherEdDatabase.objects.filter(id=higherEdId)
         excelDataObj = eval(excelData[0].data)
+        higherEdId = excelData[0].id
         data = cohortTrain(prediction[0].numberOfStudents, prediction[0].sigma,
                            prediction[0].alpha, prediction[0].beta, isTransfer=False, isMarkov=False, steadyStateTrigger=False, excelData=excelDataObj)
         totalGraphs = {'NumOfFigures': len(data), 'Figures': data, 'MetaData': {
-            'numberOfStudents': prediction[0].numberOfStudents, 'sigma': prediction[0].sigma, 'alpha': prediction[0].alpha, 'beta': prediction[0].beta}}
+            'numberOfStudents': prediction[0].numberOfStudents, 'sigma': prediction[0].sigma, 'alpha': prediction[0].alpha, 'beta': prediction[0].beta}, 'higherEdId': higherEdId}
         return Response(totalGraphs)
 
 
 # Gets the graph data for the charts with the inputed data when manipulating a cohort
 class getModifiedChartCohort(APIView):
 
-    def get(self, request, numberOfStudents, sigma, alpha, beta, steady):
+    def get(self, request, numberOfStudents, sigma, alpha, beta, steady, higherEdId):
+        queryResult = HigherEdDatabase.objects.filter(id=higherEdId)
+        excelDataObj = eval(queryResult[0].data)
+        print(excelDataObj)
         tempBool = True if steady == "True" else False
         data = cohortTrain(int(numberOfStudents), float(sigma), float(alpha),
-                           float(beta), isTransfer=False, isMarkov=False, steadyStateTrigger=tempBool, excelData={})
+                           float(beta), isTransfer=False, isMarkov=False, steadyStateTrigger=tempBool, excelData=excelDataObj)
 
         totalGraphs = {'NumOfFigures': len(data), 'Figures': data, 'MetaData': {
             'numberOfStudents': numberOfStudents, 'sigma': sigma, 'alpha': alpha, 'beta': beta}}

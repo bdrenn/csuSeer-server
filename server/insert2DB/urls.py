@@ -79,7 +79,7 @@ urlpatterns = [
          views.getPredictionData.as_view(), name='getPredictionData'),
 
     # Path for getting all the charts based on previous selection
-    path('getModifiedChartCohort/<str:numberOfStudents>/<str:sigma>/<str:alpha>/<str:beta>/<str:steady>/',
+    path('getModifiedChartCohort/<str:numberOfStudents>/<str:sigma>/<str:alpha>/<str:beta>/<str:steady>/<str:higherEdId>',
          views.getModifiedChartCohort.as_view(), name='getModifiedChartCohort'),
 
 

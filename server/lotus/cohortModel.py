@@ -48,7 +48,7 @@ def cohortTrain(nStudents, s, b, a, isTransfer, isMarkov, steadyStateTrigger, ex
     # Ask what data in the excel file will substitude one of these matrices
     row_size = k + 1
     column_size = n + 1
-    time = np.linspace(0, k, row_size)
+    time = np.linspace(0, k - 1, row_size - 1)
     time1 = np.linspace(0, k - 1, k)
     x = np.zeros((column_size, row_size), dtype=float)
     x_migration = np.zeros((column_size, row_size), dtype=float)
