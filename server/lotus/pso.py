@@ -10,7 +10,7 @@ import matplotlib.pyplot as plt
 from pyswarms.utils.plotters.formatters import Mesher
 
 
-def particleSwarmOptimization(request, nStudents, gradList):
+def particleSwarmOptimization(request, nStudents, excelData):
 
     # hyperparameters and bounds
     x_max = 1 * np.ones(4)
@@ -23,7 +23,7 @@ def particleSwarmOptimization(request, nStudents, gradList):
 
     # now run the optimization
     bestcost, pos = optimizer.optimize(
-        cost, 100, nStudents=nStudents, gradList=gradList)
+        cost, 100, nStudents=nStudents, excelData=excelData)
 
     # if(bestcost - 1 > 0.05):
     #     print("Bestcost - 1")
