@@ -2,7 +2,7 @@ import numpy as np
 import random as rm
 
 
-def cohortTrain(nStudents, s, b, a, isTransfer, isMarkov, steadyStateTrigger=False):
+def cohortTrain(nStudents, s, b, a, isTransfer, isMarkov, steadyStateTrigger, excelData):
     """
     Description:
     - Model a cohort of students as they progress through program
@@ -180,10 +180,7 @@ def cohortTrain(nStudents, s, b, a, isTransfer, isMarkov, steadyStateTrigger=Fal
         graduated = graduated[0]
         cohortpersistance = cohortpersistance[0]
         y = y[0]
-        # print('cohortpersistance')
-        # print(cohortpersistance)
-        # print('graduated')
-        # print(graduated)
+
         data['graduated_data'] = [graduated[0], graduated[1], graduated[2], graduated[3], graduated[4], graduated[5],
                                   graduated[6], graduated[7], graduated[8], graduated[9], graduated[10], graduated[11], graduated[12]]
         data['persistance_data'] = [cohortpersistance[0], cohortpersistance[1], cohortpersistance[2], cohortpersistance[3], cohortpersistance[4], cohortpersistance[5],
@@ -192,19 +189,44 @@ def cohortTrain(nStudents, s, b, a, isTransfer, isMarkov, steadyStateTrigger=Fal
         #         graduated[7], graduated[8], graduated[9], graduated[10], graduated[11], graduated[12], graduated[13]]
 
     else:
-        data = {'figure1': {'x-axis': time, 'uGrad': (y[0, :], '#000000'), 'coeGrad': (graduating, '#E69F00'),
-                            'description': 'figure1'},
-                'figure2': {'x-axis': time, 'f1': (x[1, :], '#000000'), 'f2': (x[2, :], '#E69F00'),
-                            's1': (x[3, :], '#56B4E9'), 's2': (x[4, :], '#009E73'), 'j1': (x[5, :], '#F0E442'),
-                            'j2': (x[6, :], '#0072B2'), 'se1': (x[7, :], '#D55E00'), 'se2': (x[8, :], '#CC79A7'),
-                            'description': 'figure2'},
-                'figure3': {'x-axis': time, 'persistance': (cohortpersistance[0], '#000000'),
-                            'retention': (cohortretention[0], '#E69F00'), 'graduation': (cohortgrad[0], '#56B4E9'),
-                            'description': 'figure3'},
-                'figure4': {'x-axis': time, '0-29units': ((x[1, :] + x[2, :]) / 2, '#000000'),
-                            '30-59units': ((x[3, :] + x[4, :]) / 2, '#E69F00'),
-                            '60-89units': ((x[5, :] + x[6, :]) / 2, '#56B4E9'),
-                            '90-119units': ((x[7, :] + x[8, :]) / 2, '#009E73'), 'description': 'figure4'}}
+        print("exceldata")
+        print(excelData)
+        if len(excelData) == 0 or p == 1:
+            data = {'figure1': {'x-axis': time, 'uGrad': (y[0, :], '#000000'), 'coeGrad': (graduating, '#E69F00'),
+                                'description': 'figure1', 'yLabel': 'Number of Students'},
+                    'figure2': {'x-axis': time, 'f1': (x[1, :], '#000000'), 'f2': (x[2, :], '#E69F00'),
+                                's1': (x[3, :], '#56B4E9'), 's2': (x[4, :], '#009E73'), 'j1': (x[5, :], '#F0E442'),
+                                'j2': (x[6, :], '#0072B2'), 'se1': (x[7, :], '#D55E00'), 'se2': (x[8, :], '#CC79A7'),
+                                'description': 'figure2', 'yLabel': 'Number of Students in Each Class'},
+                    'figure3': {'x-axis': time, 'persistance': (cohortpersistance[0], '#000000'),
+                                'retention': (cohortretention[0], '#E69F00'), 'graduation': (cohortgrad[0], '#56B4E9'),
+                                'description': 'figure3', 'yLabel': 'Persistance, Retention, and Graduation (%)'},
+                    'figure4': {'x-axis': time, '0-29units': ((x[1, :] + x[2, :]) / 2, '#000000'),
+                                '30-59units': ((x[3, :] + x[4, :]) / 2, '#E69F00'),
+                                '60-89units': ((x[5, :] + x[6, :]) / 2, '#56B4E9'),
+                                '90-119units': ((x[7, :] + x[8, :]) / 2, '#009E73'), 'description': 'figure4', 'yLabel': 'Number of Students'}}
+        else:
+            excelPersistance = [
+                i / j for i, j in zip(excelData['PERSIST COUNT'], excelData['HEADCOUNT'])]
+            excelRetention = [
+                i / j for i, j in zip(excelData['RETENTION COUNT'], excelData['HEADCOUNT'])]
+            excelGrad = [
+                i / j for i, j in zip(excelData['GRADUATION COUNT'], excelData['HEADCOUNT'])]
+
+            data = {'figure1': {'x-axis': time, 'uGrad': (y[0, :], '#000000'), 'coeGrad': (graduating, '#E69F00'),
+                                'description': 'figure1', 'yLabel': 'Number of Students'},
+                    'figure2': {'x-axis': time, 'f1': (x[1, :], '#000000'), 'f2': (x[2, :], '#E69F00'),
+                                's1': (x[3, :], '#56B4E9'), 's2': (x[4, :], '#009E73'), 'j1': (x[5, :], '#F0E442'),
+                                'j2': (x[6, :], '#0072B2'), 'se1': (x[7, :], '#D55E00'), 'se2': (x[8, :], '#CC79A7'),
+                                'description': 'figure2', 'yLabel': 'Number of Students in Each Class'},
+                    'figure3': {'x-axis': time, 'persistance': (cohortpersistance[0], '#000000', 'true'),
+                                'retention': (cohortretention[0], '#E69F00', 'true'), 'graduation': (cohortgrad[0], '#56B4E9', 'true'),
+                                'description': 'figure3', 'yLabel': 'Persistance, Retention, and Graduation (%)', 'persistanceExcelData': (excelPersistance, '#000000', 'false'), 'retentionExcelData': (excelRetention, '#E69F00', 'false'), 'graduationExcelData': (excelGrad, '#56B4E9', 'false')},
+                    'figure4': {'x-axis': time, '0-29units': ((x[1, :] + x[2, :]) / 2, '#000000'),
+                                '30-59units': ((x[3, :] + x[4, :]) / 2, '#E69F00'),
+                                '60-89units': ((x[5, :] + x[6, :]) / 2, '#56B4E9'),
+                                '90-119units': ((x[7, :] + x[8, :]) / 2, '#009E73'), 'description': 'figure4', 'yLabel': 'Number of Students'}}
+
     return data
 
 

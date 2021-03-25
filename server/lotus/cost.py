@@ -19,22 +19,21 @@ def cost(x, nStudents, gradList):
         a = x[j, 2]
         # l = x[j,3]
         cohort_train = cohortTrain(
-            nStudents, s, b, a, isTransfer=False, isMarkov=True)
+            nStudents, s, b, a, isTransfer=False, isMarkov=True, steadyStateTrigger=False, excelData={})
         grad = cohort_train['graduated_data']
         persis = cohort_train['persistance_data']
         # grad = cohortTrain(nStudents, s, b, a, isTransfer=False, isMarkov=True)
 
         for i in range(0, len(UnivGrad10)):
-            if(UnivPersis10[i] == 0):
-                breakFlag = True
-                break
+            # if(UnivPersis10[i] == 0):
+            #     breakFlag = True
+            #     break
             graderror1[i] = np.power(
-                (UnivGrad10[i]-grad[i]), 2)
+                (UnivGrad10[i]-grad[i]), 2)/np.power((UnivGrad10[i]+.0001), 2)
             persistanterro1[i] = np.power(
-                (UnivPersis10[i]-(persis[i] * nStudents)), 2)
-        print("persis")
-        print(persis)
-        endsumerror.append(np.sum(graderror1) + np.sum(persistanterro1))
-        if breakFlag:
-            break
+                (UnivPersis10[i]-(persis[i] * nStudents)), 2)/np.power((UnivPersis10[i]+.0001), 2)
+        # eventually we will add this endsumerror.append(np.sum(graderror1) + np.sum(persistanterro1))
+        endsumerror.append(np.sum(graderror1))
+        # if breakFlag:
+        #     break
     return endsumerror

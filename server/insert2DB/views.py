@@ -237,7 +237,7 @@ def trainModel(request):
     [sigma, beta, alpha, lmbd] = particleSwarmOptimization(
         request, nStudents, gradList)
     graph = cohortTrain(nStudents, sigma, beta, alpha,
-                        isTransfer=False, isMarkov=False)
+                        isTransfer=False, isMarkov=False, steadyStateTrigger=False, excelData={})
     # schoolData = predictionType.objects.filter(UniqueID = uniqueID)
     newdata = predictionType(UniqueID=uniqueID, sigma=sigma, alpha=alpha,
                              beta=beta, lmbda=lmbd, numberOfStudents=nStudents, pubDate=timezone.now())
@@ -265,7 +265,7 @@ class testData(APIView):  # gradRate
     # Send a schools test data to the oracle
     def get(self, request, incomingStudents):
         data = cohortTrain(incomingStudents, 0.02, 0.05,
-                           0.15, isTransfer=False, isMarkov=False)
+                           0.15, isTransfer=False, isMarkov=False, steadyStateTrigger=False, excelData={})
         totalGraphs = {'NumOfFigures': len(data), 'Figures': data}
         # json_dump = json.dumps(totalGraphs, cls=NumpyEncoder)
         return Response(totalGraphs)
@@ -307,6 +307,7 @@ class getPredictionData(APIView):
     def get(self, request, getStudentType, getYearTerm, getAcademicType):
         queryResult = HigherEdDatabase.objects.filter(studentType=getStudentType,
                                                       yearTerm=getYearTerm, academicType=getAcademicType).values('id')
+
         queryResultList = list(queryResult)
         higherEdId = ""
         print(len(queryResultList))
@@ -316,8 +317,10 @@ class getPredictionData(APIView):
         prediction = predictionType.objects.filter(UniqueID=higherEdId)
         # if len(queryPrediction) > 0:
         #     prediction = max(list(queryPrediction))
+        excelData = HigherEdDatabase.objects.filter(id=higherEdId)
+        excelDataObj = eval(excelData[0].data)
         data = cohortTrain(prediction[0].numberOfStudents, prediction[0].sigma,
-                           prediction[0].alpha, prediction[0].beta, isTransfer=False, isMarkov=False)
+                           prediction[0].alpha, prediction[0].beta, isTransfer=False, isMarkov=False, steadyStateTrigger=False, excelData=excelDataObj)
         totalGraphs = {'NumOfFigures': len(data), 'Figures': data, 'MetaData': {
             'numberOfStudents': prediction[0].numberOfStudents, 'sigma': prediction[0].sigma, 'alpha': prediction[0].alpha, 'beta': prediction[0].beta}}
         return Response(totalGraphs)
@@ -325,10 +328,11 @@ class getPredictionData(APIView):
 
 # Gets the graph data for the charts with the inputed data when manipulating a cohort
 class getModifiedChartCohort(APIView):
+
     def get(self, request, numberOfStudents, sigma, alpha, beta, steady):
         tempBool = True if steady == "True" else False
         data = cohortTrain(int(numberOfStudents), float(sigma), float(alpha),
-                           float(beta), isTransfer=False, isMarkov=False, steadyStateTrigger=tempBool)
+                           float(beta), isTransfer=False, isMarkov=False, steadyStateTrigger=tempBool, excelData={})
 
         totalGraphs = {'NumOfFigures': len(data), 'Figures': data, 'MetaData': {
             'numberOfStudents': numberOfStudents, 'sigma': sigma, 'alpha': alpha, 'beta': beta}}
