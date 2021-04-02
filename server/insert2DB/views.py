@@ -308,7 +308,6 @@ class getPredictionData(APIView):
 
         queryResultList = list(queryResult)
         higherEdId = ""
-        print(len(queryResultList))
         if len(queryResultList) > 0:
             # Work on max for the id
             higherEdId = queryResultList[-1]['id']
