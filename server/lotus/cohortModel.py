@@ -207,15 +207,16 @@ def cohortTrain(nStudents, s, b, a, isTransfer, isMarkov, steadyStateTrigger, ex
     
     else:
         data = {'figure1': {'x-axis': time, 'persistence': (y, '#000000'), 'coeGrad': (graduating, '#E69F00'),
-                    'description': 'figure1', 'yLabel': 'Number of Students'},
-        'figure2': {'x-axis': time, 'f1': (x1, '#000000'), 'f2': (x2, '#E69F00'),
+                    'description': '(TODO) Description of figure1', 'yLabel': 'Number of Students'},
+                'figure2': {'x-axis': time, 'f1': (x1, '#000000'), 'f2': (x2, '#E69F00'),
                     's1': (x3, '#56B4E9'), 's2': (x4, '#009E73'), 'j1': (x5, '#F0E442'),
                     'j2': (x6, '#0072B2'), 'se1': (x7, '#D55E00'), 'se2': (x8, '#CC79A7'),
-                    'description': 'figure2', 'yLabel': 'Number of Students in Each Class'},
-                    'figure4': {'x-axis': time, '0-29units': ((x1 + x2) / 2, '#000000'),
-                                '30-59units': ((x3 + x4) / 2, '#E69F00'),
-                                '60-89units': ((x5 + x6) / 2, '#56B4E9'),
-                                '90-119units': ((x7 + x8) / 2, '#009E73'), 'description': 'figure4', 'yLabel': 'Number of Students'}}
+                    'description': '(TODO) Description of figure2', 'yLabel': 'Number of Students in Each Class'},
+                'figure3': {'x-axis': time, '0-29units': ((x1 + x2) / 2, '#000000'),
+                            '30-59units': ((x3 + x4) / 2, '#E69F00'),
+                            '60-89units': ((x5 + x6) / 2, '#56B4E9'),
+                            '90-119units': ((x7 + x8) / 2, '#009E73'), 'description': '(TODO) Description of figure3',
+                            'yLabel': 'Number of Students'}}
         # 'figure3': {'x-axis': time, 'persistance': (cohortpersistance[0], '#000000'),
         #             'retention': (cohortretention[0], '#E69F00'), 'graduation': (cohortgrad[0], '#56B4E9'),
         #             'description': 'figure3', 'yLabel': 'Persistance, Retention, and Graduation (%)'}}
@@ -232,11 +233,13 @@ def cohortTrain(nStudents, s, b, a, isTransfer, isMarkov, steadyStateTrigger, ex
             #     (i / j)*100  for i, j in zip(excelData['RETENTION COUNT'], excelData['HEADCOUNT'])]
             # excelGrad = [
             #     (i / j)*100  for i, j in zip(excelData['GRADUATION COUNT'], excelData['HEADCOUNT'])]
-            data['figure3'] ={'x-axis': time, 'persistance': (cohortpersistance[0] , '#000000', 'true'),
-                                'retention': (cohortretention[0], '#E69F00', 'true'), 'graduation': (cohortgrad[0], '#56B4E9', 'true'),
-                                'description': 'figure3', 'yLabel': 'Persistance, Retention, and Graduation (decimal)', 
-                                'persistanceExcelData': (excelPersistance, '#000000', 'false'), 'retentionExcelData': (excelRetention, '#E69F00', 'false'), 
-                                'graduationExcelData': (excelGrad, '#56B4E9', 'false')}
+            data['figure4'] ={'x-axis': time, 'Model Persistence': (cohortpersistance[0] , '#000000', 'true'),
+                                'Model Retention': (cohortretention[0], '#E69F00', 'true'),
+                                'Model Graduation': (cohortgrad[0], '#56B4E9', 'true'),
+                                'description': '(TODO) Description of  figure4', 'yLabel': 'Persistance, Retention, and Graduation (%)', 
+                                'Persistance Data (Circle)': (excelPersistance, '#000000', 'false'),
+                                'Retention Data (Circle)': (excelRetention, '#E69F00', 'false'), 
+                                'Graduation Data (Circle)': (excelGrad, '#56B4E9', 'false')}
             # data = {'figure1': {'x-axis': time, 'persistence': (y, '#000000'), 'students graduating': (graduating, '#E69F00'),
             #                     'description': 'figure1', 'yLabel': 'Number of Students'},
             #        'figure2': {'x-axis': time, 'f1': (x1, '#000000'), 'f2': (x2, '#E69F00'),
