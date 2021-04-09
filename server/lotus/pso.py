@@ -13,11 +13,16 @@ from pyswarms.utils.plotters.formatters import Mesher
 def particleSwarmOptimization(request, nStudents, excelData):
 
     # hyperparameters and bounds
-    x_max = 1 * np.ones(4)
-    x_min = 0 * x_max
+    # edit each position to have a more accurate upper bound (and lower bound maybe)
+    # x_max = 1 * np.ones(4)
+    # sigma, Beta, alpha, 
+    x_max = np.array([0.035,0.125,0.0001,1])
+    x_min = np.array([0,0.116,0,0])
     bounds = (x_min, x_max)
     # instatiate the optimizer
     options = {'c1': .5, 'c2': .6, 'w': .8}
+    # options = {'c1': 1, 'c2': 1, 'w': 1}
+
     optimizer = GlobalBestPSO(
         n_particles=10, dimensions=4, options=options, bounds=bounds)
 

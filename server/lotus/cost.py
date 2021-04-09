@@ -17,6 +17,10 @@ def cost(x, nStudents, excelData):
     # [0, 0, 1, 33, 195, 305]
     UnivGrad10 = excelData["GRADUATION COUNT"]
     UnivPersis10 = excelData["PERSIST COUNT"]
+    # print('UnivGrad10')
+    # print(UnivGrad10)
+    # print ('UnivPersis10')
+    # print(UnivPersis10)
     # trim persist count to the first 0 (remove trailing 0s)
     graderror1 = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
     persistanterro1 = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
@@ -43,13 +47,25 @@ def cost(x, nStudents, excelData):
             # if(UnivPersis10[i] == 0):
             #     breakFlag = True
             #     break
-            graderror1[i] = np.power(
-                (UnivGrad10[i]-grad[i]), 2)/np.power((UnivGrad10[i]+.0001), 2)
-            persistanterro1[i] = np.power(
-                (UnivPersis10[i]-(persis[i] * nStudents)), 2)/np.power((UnivPersis10[i]+.0001), 2)
+            # graderror1[i] = np.power(
+            #     (UnivGrad10[i]-grad[i]), 2)
+            # #/np.power((UnivGrad10[i]+.0001), 2)
+            # persistanterro1[i] = np.power(
+            #     (UnivPersis10[i]-(persis[i] * nStudents)), 2)
+            # #/np.power((UnivPersis10[i]), 2)
+            graderror1[i] = abs(UnivGrad10[i]-(grad[i]* nStudents)) *2.5
+            persistanterro1[i] = abs(UnivPersis10[i]-(persis[i] ))
 
         # eventually we will add this endsumerror.append(np.sum(graderror1) + np.sum(persistanterro1))
-        endsumerror.append(np.sum(graderror1))
+        # print ('graderror1')
+        # print(graderror1)
+        # print('persistanterro1')
+        # print(persistanterro1)
+        # print ('graderror1')
+        # print(graderror1)
+        # print ('persistanterro1')
+        # print(persistanterro1)
+        endsumerror.append(np.sum(graderror1)+ np.sum(persistanterro1))
         # if breakFlag:
         #     break
     return endsumerror
