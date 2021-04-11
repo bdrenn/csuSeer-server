@@ -275,10 +275,15 @@ class getAcademicLabel(APIView):
     def get(self, request, getStudentType, getYearTerm):
         queryResult = HigherEdDatabase.objects.filter(
             studentType=getStudentType, yearTerm=getYearTerm).values('academicLabel').distinct()
-        print(queryResult)
         # data = HigherEdDatabase.objects.filter(studentType=studentType)
         return Response(list(queryResult))
 
+class getAcademicLabelFromYear(APIView):
+    def get(self, request,getYearTerm):
+        queryResult = HigherEdDatabase.objects.filter(
+            yearTerm__level__gte=getYearTerm).values('academicLabel').distinct()
+        # data = HigherEdDatabase.objects.filter(studentType=studentType)
+        return Response(list(queryResult))
 
 class getYearTerm(APIView):
     # permission_classes = (IsAuthenticated, )
@@ -287,7 +292,11 @@ class getYearTerm(APIView):
             studentType=getStudentType).values('yearTerm').distinct()
         # data = HigherEdDatabase.objects.filter(studentType=studentType)
         return Response(list(queryResult))
-
+class getYearTermAll(APIView):
+    def get(self, request):
+        queryResult = HigherEdDatabase.objects.filter().values('yearTerm').distinct()
+        # data = HigherEdDatabase.objects.filter(studentType=studentType)
+        return Response(list(queryResult))
 
 class getAcademicType(APIView):
     # permission_classes = (IsAuthenticated, )
@@ -297,6 +306,7 @@ class getAcademicType(APIView):
         # data = HigherEdDatabase.objects.filter(studentType=studentType)
         print(list(queryResult))
         return Response(list(queryResult))
+
 
 # Getting the prediction data and student numbers based on the user's input
 

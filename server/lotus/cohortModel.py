@@ -222,16 +222,11 @@ def cohortTrain(nStudents, s, b, a, isTransfer, isMarkov, steadyStateTrigger, ex
         #             'description': 'figure3', 'yLabel': 'Persistance, Retention, and Graduation (%)'}}
         if p != 1:
             excelData['PERSIST COUNT'] = removeTrailingZeroes(excelData['PERSIST COUNT'])
-            print('PERSIST COUNT')
-            print(excelData['PERSIST COUNT'])
-            print('RETENTION COUNT')
-            print(excelData['RETENTION COUNT'])
             excelData['RETENTION COUNT'] = removeTrailingZeroes(excelData['RETENTION COUNT'])
-            print('RETENTION COUNT')
-            print(excelData['RETENTION COUNT'])
+            excelData['RETENTION COUNT'] = excelData['RETENTION COUNT'] [0:len(excelData['PERSIST COUNT'])]
             excelData['GRADUATION COUNT']= removeTrailingZeroes(excelData['GRADUATION COUNT'])
-            print ('GRADUATION COUNT')
-            print(excelData['GRADUATION COUNT'])
+            excelData['GRADUATION COUNT'] = excelData['GRADUATION COUNT'][0:len(excelData['PERSIST COUNT'])]
+
             excelPersistance = [ (i/excelData['HEADCOUNT'][0])*100 for i in excelData['PERSIST COUNT']]
             excelRetention = [ (i/excelData['HEADCOUNT'][0])*100 for i in excelData['RETENTION COUNT']]
             excelGrad = [(i/excelData['HEADCOUNT'][0])*100 for i in excelData['GRADUATION COUNT']]

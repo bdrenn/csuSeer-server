@@ -70,6 +70,9 @@ urlpatterns = [
     path('getYearTerm/<str:getStudentType>/',
          views.getYearTerm.as_view(), name='getYearTerm'),
 
+    # Path for getting all year terms
+    path('getYearTermAll/',
+         views.getYearTermAll.as_view(), name='getYearTermAll'), 
     # Path for getting all the academic types based on previos selections
     path('getAcademicType/<str:getStudentType>/<str:getYearTerm>/<str:getAcademicLabel>/',
          views.getAcademicType.as_view(), name='getAcademicType'),
