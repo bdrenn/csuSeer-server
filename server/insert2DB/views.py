@@ -289,23 +289,45 @@ class getAcademicLabelFromYear(APIView):
 # Filters the academic label for the snapshort charts
 
 
+# class getAcademicLabelFromYearAll(APIView):
+#     def get(self, request, getYearTerm):
+#         years_back = 6
+#         queried_data = []
+
+#         for i in range(1, years_back+1):
+#             fall_yearterm = "FALL " + str(int(getYearTerm) - i)
+#             spring_yearterm = "SPRING " + str(int(getYearTerm) - i)
+
+#             fall_list = list(HigherEdDatabase.objects.filter(
+#                 yearTerm=fall_yearterm).values('academicLabel').distinct())
+#             spring_list = list(HigherEdDatabase.objects.filter(
+#                 yearTerm=spring_yearterm).values('academicLabel').distinct())
+
+#             if ((fall_list != []) and (fall_list[0]['academicLabel'] not in queried_data)):
+#                 queried_data.append(fall_list[0]['academicLabel'])
+#             if ((spring_list != []) and (spring_list[0]['academicLabel'] not in queried_data)):
+#                 queried_data.append(spring_list[0]['academicLabel'])
+#         return Response(queried_data)
 class getAcademicLabelFromYearAll(APIView):
     def get(self, request, getYearTerm):
-        years_back = 3
+        years_back = 6
         queried_data = []
+        temp_list=[]
         for i in range(1, years_back+1):
             fall_yearterm = "FALL " + str(int(getYearTerm) - i)
             spring_yearterm = "SPRING " + str(int(getYearTerm) - i)
-            fall_list = list(HigherEdDatabase.objects.filter(
-                yearTerm=fall_yearterm).values('academicLabel').distinct())
-            spring_list = list(HigherEdDatabase.objects.filter(
-                yearTerm=spring_yearterm).values('academicLabel').distinct())
-            if ((fall_list != []) and (fall_list[0]['academicLabel'] not in queried_data)):
-                queried_data.append(fall_list[0]['academicLabel'])
-            if ((spring_list != []) and (spring_list[0]['academicLabel'] not in queried_data)):
-                queried_data.append(spring_list[0]['academicLabel'])
-        return Response(queried_data)
 
+            fall_list = list(HigherEdDatabase.objects.filter(
+                yearTerm=fall_yearterm).values('academicLabel','academicType').distinct())
+            spring_list = list(HigherEdDatabase.objects.filter(
+                yearTerm=spring_yearterm).values('academicLabel','academicType').distinct())
+
+            if (fall_list != []):
+                queried_data.append(fall_list)
+            if (spring_list != []):
+                queried_data.append(spring_list)
+        print (queried_data)
+        return Response(queried_data)
 
 class getYearTerm(APIView):
     # permission_classes = (IsAuthenticated, )
