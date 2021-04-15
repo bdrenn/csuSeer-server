@@ -278,12 +278,34 @@ class getAcademicLabel(APIView):
         # data = HigherEdDatabase.objects.filter(studentType=studentType)
         return Response(list(queryResult))
 
+
 class getAcademicLabelFromYear(APIView):
-    def get(self, request,getYearTerm):
+    def get(self, request, getYearTerm):
         queryResult = HigherEdDatabase.objects.filter(
             yearTerm__level__gte=getYearTerm).values('academicLabel').distinct()
         # data = HigherEdDatabase.objects.filter(studentType=studentType)
         return Response(list(queryResult))
+
+# Filters the academic label for the snapshort charts
+
+
+class getAcademicLabelFromYearAll(APIView):
+    def get(self, request, getYearTerm):
+        years_back = 3
+        queried_data = []
+        for i in range(1, years_back+1):
+            fall_yearterm = "FALL " + str(int(getYearTerm) - i)
+            spring_yearterm = "SPRING " + str(int(getYearTerm) - i)
+            fall_list = list(HigherEdDatabase.objects.filter(
+                yearTerm=fall_yearterm).values('academicLabel').distinct())
+            spring_list = list(HigherEdDatabase.objects.filter(
+                yearTerm=spring_yearterm).values('academicLabel').distinct())
+            if ((fall_list != []) and (fall_list[0]['academicLabel'] not in queried_data)):
+                queried_data.append(fall_list[0]['academicLabel'])
+            if ((spring_list != []) and (spring_list[0]['academicLabel'] not in queried_data)):
+                queried_data.append(spring_list[0]['academicLabel'])
+        return Response(queried_data)
+
 
 class getYearTerm(APIView):
     # permission_classes = (IsAuthenticated, )
@@ -292,11 +314,13 @@ class getYearTerm(APIView):
             studentType=getStudentType).values('yearTerm').distinct()
         # data = HigherEdDatabase.objects.filter(studentType=studentType)
         return Response(list(queryResult))
-class getYearTermAll(APIView):
-    def get(self, request):
-        queryResult = HigherEdDatabase.objects.filter().values('yearTerm').distinct()
-        # data = HigherEdDatabase.objects.filter(studentType=studentType)
-        return Response(list(queryResult))
+
+# class getYearTermAll(APIView):
+#     def get(self, request):
+#         queryResult = HigherEdDatabase.objects.filter().values('yearTerm').distinct()
+#         # data = HigherEdDatabase.objects.filter(studentType=studentType)
+#         return Response(list(queryResult))
+
 
 class getAcademicType(APIView):
     # permission_classes = (IsAuthenticated, )
@@ -306,6 +330,27 @@ class getAcademicType(APIView):
         # data = HigherEdDatabase.objects.filter(studentType=studentType)
         print(list(queryResult))
         return Response(list(queryResult))
+
+# Filters the academic type for the snapshort charts
+
+
+class getAcademicTypeFromYearAll(APIView):
+    def get(self, request, getYearTerm, getAcademicLabel):
+        years_back = 3
+        queried_data = []
+        for i in range(1, years_back+1):
+            fall_yearterm = "FALL " + str(int(getYearTerm) - i)
+            spring_yearterm = "SPRING " + str(int(getYearTerm) - i)
+            fall_list = list(HigherEdDatabase.objects.filter(
+                yearTerm=fall_yearterm, academicLabel=getAcademicLabel).values('academicType').distinct())
+            spring_list = list(HigherEdDatabase.objects.filter(
+                yearTerm=spring_yearterm, academicLabel=getAcademicLabel).values('academicType').distinct())
+            if ((fall_list != []) and (fall_list[0]['academicType'] not in queried_data)):
+                queried_data.append(fall_list[0]['academicType'])
+            if ((spring_list != []) and (spring_list[0]['academicType'] not in queried_data)):
+                queried_data.append(spring_list[0]['academicType'])
+        print(queried_data)
+        return Response(queried_data)
 
 
 # Getting the prediction data and student numbers based on the user's input
