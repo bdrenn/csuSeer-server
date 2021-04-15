@@ -54,6 +54,7 @@ def cost(x, nStudents, excelData):
             #     (UnivPersis10[i]-(persis[i] * nStudents)), 2)
             # #/np.power((UnivPersis10[i]), 2)
             graderror1[i] = abs(UnivGrad10[i]-(grad[i]* nStudents)) *2.5
+            #2.5
             persistanterro1[i] = abs(UnivPersis10[i]-(persis[i] ))
 
         # eventually we will add this endsumerror.append(np.sum(graderror1) + np.sum(persistanterro1))

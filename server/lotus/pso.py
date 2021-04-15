@@ -17,7 +17,7 @@ def particleSwarmOptimization(request, nStudents, excelData):
     # x_max = 1 * np.ones(4)
     # sigma, Beta, alpha, 
     x_max = np.array([0.035,0.125,0.0005,1])
-    x_min = np.array([0,0.116,0,0])
+    x_min = np.array([0.01,0.116,0,0])
     bounds = (x_min, x_max)
     # instatiate the optimizer
     options = {'c1': .5, 'c2': .6, 'w': .8}
