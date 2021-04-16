@@ -66,30 +66,28 @@ urlpatterns = [
     path('getAcademicLabel/<str:getStudentType>/<str:getYearTerm>/',
          views.getAcademicLabel.as_view(), name='getAcademicLabel'),
 
-    # Path for getting all academic labels for the use of snapshot charts
-    path('getAcademicLabelAll/<str:getYearTerm>/',
-         views.getAcademicLabelFromYearAll.as_view(), name='getAcademicLabelAll'),
+    # Path for getting all academic labels after a certain year
+    path('getAcademicLabelFromYearAll/<str:getYearTerm>/',
+         views.getAcademicLabelFromYearAll.as_view(), name='getAcademicLabelFromYearAll'),
 
     # Path for getting all student types based on year terms
     path('getYearTerm/<str:getStudentType>/',
          views.getYearTerm.as_view(), name='getYearTerm'),
 
+    # Path for getting all year terms
+    # path('getYearTermAll/',
+    #      views.getYearTermAll.as_view(), name='getYearTermAll'), 
     # Path for getting all the academic types based on previos selections
     path('getAcademicType/<str:getStudentType>/<str:getYearTerm>/<str:getAcademicLabel>/',
          views.getAcademicType.as_view(), name='getAcademicType'),
-
-    # Path for getting all academic types for the use of snapshot charts
-    path('getAcademicTypelAll/<str:getYearTerm>/<str:getAcademicLabel>/',
-         views.getAcademicTypeFromYearAll.as_view(), name='getAcademicTypeFromYearAll'),
-
 
     # Path for getting all the charts based on previous selection
     path('getPredictionData/<str:getStudentType>/<str:getYearTerm>/<str:getAcademicType>/',
          views.getPredictionData.as_view(), name='getPredictionData'),
 
     # Path for getting all the charts based on previous selection
-    path('getModifiedChartCohort/<str:numberOfStudents>/<str:sigma>/<str:alpha>/<str:beta>/<str:steady>/<str:higherEdId>',
-         views.getModifiedChartCohort.as_view(), name='getModifiedChartCohort'),
+    path('getSnapshotData/<str:getYearTerm>/<str:getAcademicType>/',
+         views.getSnapshotData.as_view(), name='getSnapshotData'),
 
 
     # Path for password reset
