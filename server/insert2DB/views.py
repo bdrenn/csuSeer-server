@@ -214,6 +214,19 @@ class multipleData(APIView):
 def uploadFile(request):
     # HigherEdDataBase is the raw records provided by the users
     print(request.data.get('data'))
+    filterCheck = HigherEdDatabase.objects.filter(yearTerm=request.data.get(
+        'yearTermF'), academicType=request.data.get('academicTypeF'), studentType=request.data.get('studentTypeF'))
+    if len(filterCheck) > 0:
+        filterCheck = filterCheck[0]
+        filterCheck.data = request.data.get('data')
+        filterCheck.yearTerm = request.data.get('yearTermF')
+        filterCheck.academicType = request.data.get('academicTypeF')
+        filterCheck.studentType = request.data.get('studentTypeF')
+        filterCheck.amountOfStudents = request.data.get('amountOfStudents')
+        filterCheck.academicLabel = request.data.get('academicLabel')
+        filterCheck.pubDate = timezone.now()
+        filterCheck.save()
+        return Response(filterCheck.id)
     newData = HigherEdDatabase(data=request.data.get('data'), yearTerm=request.data.get('yearTermF'), academicType=request.data.get('academicTypeF'), studentType=request.data.get(
         'studentTypeF'), cohortDate=request.data.get('cohortDate'), amountOfStudents=request.data.get('amountOfStudents'), academicLabel=request.data.get('academicLabel'), pubDate=timezone.now())
     newData.save()
@@ -291,21 +304,25 @@ class getAcademicLabelFromYear(APIView):
 
 class getAcademicLabelFromYearAll(APIView):
     def get(self, request, getYearTerm):
-        years_back = 3
+        years_back = 5
         queried_data = []
+        temp_list = []
         for i in range(1, years_back+1):
             fall_yearterm = "FALL " + str(int(getYearTerm) - i)
             spring_yearterm = "SPRING " + str(int(getYearTerm) - i)
+
             fall_list = list(HigherEdDatabase.objects.filter(
-                yearTerm=fall_yearterm).values('academicLabel').distinct())
+                yearTerm=fall_yearterm).values('academicLabel', 'academicType').distinct())
             spring_list = list(HigherEdDatabase.objects.filter(
-                yearTerm=spring_yearterm).values('academicLabel').distinct())
-            print("sprint_list")
-            print(sring_list)
-            if ((fall_list != []) and (fall_list[0]['academicLabel'] not in queried_data)):
-                queried_data.append(fall_list[0]['academicLabel'])
-            if ((spring_list != []) and (spring_list[0]['academicLabel'] not in queried_data)):
-                queried_data.append(spring_list[0]['academicLabel'])
+                yearTerm=spring_yearterm).values('academicLabel', 'academicType').distinct())
+            print(spring_yearterm)
+            print(spring_list)
+            if (fall_list != []):
+                queried_data.append(fall_list)
+            if (spring_list != []):
+                queried_data.append(spring_list)
+        print(queried_data)
+        print(len(queried_data))
         return Response(queried_data)
 
 
@@ -332,27 +349,6 @@ class getAcademicType(APIView):
         # data = HigherEdDatabase.objects.filter(studentType=studentType)
         print(list(queryResult))
         return Response(list(queryResult))
-
-# Filters the academic type for the snapshort charts
-
-
-class getAcademicTypeFromYearAll(APIView):
-    def get(self, request, getYearTerm, getAcademicLabel):
-        years_back = 3
-        queried_data = []
-        for i in range(1, years_back+1):
-            fall_yearterm = "FALL " + str(int(getYearTerm) - i)
-            spring_yearterm = "SPRING " + str(int(getYearTerm) - i)
-            fall_list = list(HigherEdDatabase.objects.filter(
-                yearTerm=fall_yearterm, academicLabel=getAcademicLabel).values('academicType').distinct())
-            spring_list = list(HigherEdDatabase.objects.filter(
-                yearTerm=spring_yearterm, academicLabel=getAcademicLabel).values('academicType').distinct())
-            if ((fall_list != []) and (fall_list[0]['academicType'] not in queried_data)):
-                queried_data.append(fall_list[0]['academicType'])
-            if ((spring_list != []) and (spring_list[0]['academicType'] not in queried_data)):
-                queried_data.append(spring_list[0]['academicType'])
-        print(queried_data)
-        return Response(queried_data)
 
 
 # Getting the prediction data and student numbers based on the user's input
@@ -397,6 +393,33 @@ class getModifiedChartCohort(APIView):
         return Response(totalGraphs)
 
 # This class we get a graph depending on the value given to the steady state (p)
+
+
+class getSnapshotData(APIView):
+    def get(self, request, getYearTerm, getAcademicType):
+        # FALL 16
+        # FALL 17
+        fall_yearterm = "FALL " + str(int(getYearTerm)-5)
+        spring_yearterm = "SPRING " + str(int(getYearTerm)-5)
+        fall_list = list(HigherEdDatabase.objects.filter(
+            yearTerm__gte=fall_yearterm, academicType=getAcademicType).values('id').distinct())
+        spring_list = list(HigherEdDatabase.objects.filter(
+            yearTerm__gte=spring_yearterm, academicType=getAcademicType).values('id').distinct())
+
+        for i in fall_list:
+            print(i['id'])
+            # using higher ed id retrieve the prediction data and then get highest value among them
+            # store that chosen predicdata in list
+        # repeat for spring
+
+        # filter () DONE
+        # computer science of all 5 years [] DONE
+        # Cohort Model (nStudents, s, b, a, isTransfer, isMarkov, steadyStateTrigger, excelData, retrieve x)
+        # add x to a list (offset could be done here)
+        # ende loop
+        # add every x of the list
+        # return graph
+        return Response('response')
 
 
 @ api_view(["POST"])

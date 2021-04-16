@@ -191,8 +191,8 @@ def cohortTrain(nStudents, s, b, a, isTransfer, isMarkov, steadyStateTrigger, ex
     cohortpersistance[0] = [x *100 for x in cohortpersistance[0]]
     cohortretention[0] =[x *100 for x in cohortretention[0]]
     cohortgrad[0] =[x *100 for x in cohortgrad[0]]
-
-
+    # print ('x variable')
+    # print (x)
     if isMarkov:
         graduated = graduated[0]
         cohortpersistance = cohortpersistance[0]
