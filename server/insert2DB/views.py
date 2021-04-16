@@ -214,6 +214,18 @@ class multipleData(APIView):
 def uploadFile(request):
     # HigherEdDataBase is the raw records provided by the users
     print(request.data.get('data'))
+    filterCheck= HigherEdDatabase.objects.filter( yearTerm=request.data.get('yearTermF'), academicType=request.data.get('academicTypeF'), studentType=request.data.get('studentTypeF'))
+    if len(filterCheck)>0:
+        filterCheck=filterCheck[0]
+        filterCheck.data=request.data.get('data')
+        filterCheck.yearTerm=request.data.get('yearTermF')
+        filterCheck.academicType=request.data.get('academicTypeF')
+        filterCheck.studentType =request.data.get('studentTypeF')
+        filterCheck.amountOfStudents = request.data.get('amountOfStudents')
+        filterCheck.academicLabel=request.data.get('academicLabel')
+        filterCheck.pubDate= timezone.now()
+        filterCheck.save()
+        return Response(filterCheck.id)
     newData = HigherEdDatabase(data=request.data.get('data'), yearTerm=request.data.get('yearTermF'), academicType=request.data.get('academicTypeF'), studentType=request.data.get(
         'studentTypeF'), cohortDate=request.data.get('cohortDate'), amountOfStudents=request.data.get('amountOfStudents'), academicLabel=request.data.get('academicLabel'), pubDate=timezone.now())
     newData.save()
