@@ -300,6 +300,8 @@ class getAcademicLabelFromYearAll(APIView):
                 yearTerm=fall_yearterm).values('academicLabel').distinct())
             spring_list = list(HigherEdDatabase.objects.filter(
                 yearTerm=spring_yearterm).values('academicLabel').distinct())
+            print("sprint_list")
+            print(sring_list)
             if ((fall_list != []) and (fall_list[0]['academicLabel'] not in queried_data)):
                 queried_data.append(fall_list[0]['academicLabel'])
             if ((spring_list != []) and (spring_list[0]['academicLabel'] not in queried_data)):
