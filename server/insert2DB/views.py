@@ -398,18 +398,28 @@ class getSnapshotData(APIView):
         # FALL 16
         # FALL 17
         fall_yearterm = "FALL " +str(int(getYearTerm)-5)
-        print(fall_yearterm)
+        spring_yearterm = "SPRING " +str(int(getYearTerm)-5)
         fall_list = list(HigherEdDatabase.objects.filter(
                yearTerm__gte=fall_yearterm, academicType = getAcademicType).values('id').distinct())
-        print(fall_list)
-        return Response ('response')
-        # filter ()
-        #computer science of all 5 years []
+        spring_list = list(HigherEdDatabase.objects.filter(
+               yearTerm__gte=spring_yearterm, academicType = getAcademicType).values('id').distinct())
+        
+        for i in fall_list:
+            print (i['id'])
+            # using higher ed id retrieve the prediction data and then get highest value among them
+            # store that chosen predicdata in list
+        # repeat for spring
+
+
+        # filter () DONE
+        #computer science of all 5 years [] DONE
         #Cohort Model (nStudents, s, b, a, isTransfer, isMarkov, steadyStateTrigger, excelData, retrieve x)
         # add x to a list (offset could be done here)
         # ende loop
         # add every x of the list
         # return graph
+        return Response ('response')
+        
 
 
 @ api_view(["POST"])
