@@ -89,6 +89,8 @@ urlpatterns = [
     path('getSnapshotData/<str:getYearTerm>/<str:getAcademicType>/',
          views.getSnapshotData.as_view(), name='getSnapshotData'),
 
+    path('getModifiedChartCohort/<str:numberOfStudents>/<str:sigma>/<str:alpha>/<str:beta>/<str:steady>/<str:higherEdId>',
+         views.getModifiedChartCohort.as_view(), name='getModifiedChartCohort'),
 
     # Path for password reset
     path('account-reset-validate/verify-token/', views.CustomPasswordTokenVerificationView.as_view(),

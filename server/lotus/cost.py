@@ -3,11 +3,13 @@ import random as rm
 from .cohortModel import cohortTrain
 
 # include graduation, retention, # of students, and units
+
+
 def removeTrailingZeroes(_list):
-    i =len(_list)-1
-    while(i>=0):
-        if _list[i]==0:
-            i-=1
+    i = len(_list)-1
+    while(i >= 0):
+        if _list[i] == 0:
+            i -= 1
         else:
             return _list[0:i+1]
     return _list
@@ -38,7 +40,7 @@ def cost(x, nStudents, excelData):
         a = x[j, 2]
         # l = x[j,3]
         cohort_train = cohortTrain(
-            nStudents, s, b, a, isTransfer=False, isMarkov=True, steadyStateTrigger=False, excelData={})
+            nStudents, s, b, a, isTransfer=False, isMarkov=True, steadyStateTrigger=False, excelData={}, retrieveX=False)
         grad = cohort_train['graduated_data']
         persis = cohort_train['persistance_data']
         # grad = cohortTrain(nStudents, s, b, a, isTransfer=False, isMarkov=True)
@@ -53,9 +55,9 @@ def cost(x, nStudents, excelData):
             # persistanterro1[i] = np.power(
             #     (UnivPersis10[i]-(persis[i] * nStudents)), 2)
             # #/np.power((UnivPersis10[i]), 2)
-            graderror1[i] = abs(UnivGrad10[i]-(grad[i]* nStudents)) *2.5
-            #2.5
-            persistanterro1[i] = abs(UnivPersis10[i]-(persis[i] ))
+            graderror1[i] = abs(UnivGrad10[i]-(grad[i] * nStudents)) * 2.5
+            # 2.5
+            persistanterro1[i] = abs(UnivPersis10[i]-(persis[i]))
 
         # eventually we will add this endsumerror.append(np.sum(graderror1) + np.sum(persistanterro1))
         # print ('graderror1')
@@ -66,7 +68,7 @@ def cost(x, nStudents, excelData):
         # print(graderror1)
         # print ('persistanterro1')
         # print(persistanterro1)
-        endsumerror.append(np.sum(graderror1)+ np.sum(persistanterro1))
+        endsumerror.append(np.sum(graderror1) + np.sum(persistanterro1))
         # if breakFlag:
         #     break
     return endsumerror
