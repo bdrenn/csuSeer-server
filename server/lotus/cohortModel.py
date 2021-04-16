@@ -2,7 +2,7 @@ import numpy as np
 import random as rm
 
 
-def cohortTrain(nStudents, s, b, a, isTransfer, isMarkov, steadyStateTrigger, excelData):
+def cohortTrain(nStudents, s, b, a, isTransfer, isMarkov, steadyStateTrigger, excelData, retrieveX):
     """
     Description:
     - Model a cohort of students as they progress through program
@@ -188,11 +188,16 @@ def cohortTrain(nStudents, s, b, a, isTransfer, isMarkov, steadyStateTrigger, ex
     x6 = x[6][1:]
     x7 = x[7][1:]
     x8 = x[8][1:]
+
+    # This is returning x to be used for the snapshot charts
+    if retrieveX: 
+        return x
+
     cohortpersistance[0] = [x *100 for x in cohortpersistance[0]]
     cohortretention[0] =[x *100 for x in cohortretention[0]]
     cohortgrad[0] =[x *100 for x in cohortgrad[0]]
-    # print ('x variable')
-    # print (x)
+
+
     if isMarkov:
         graduated = graduated[0]
         cohortpersistance = cohortpersistance[0]
@@ -259,6 +264,7 @@ def cohortTrain(nStudents, s, b, a, isTransfer, isMarkov, steadyStateTrigger, ex
             #                     '60-89units': ((x5 + x6) / 2, '#56B4E9'),
             #                     '90-119units': ((x7 + x8) / 2, '#009E73'), 'description': 'figure4', 'yLabel': 'Number of Students'}}
     return data
+
 def removeTrailingZeroes(_list):
     i =len(_list)-1
     while(i>=0):

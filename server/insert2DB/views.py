@@ -214,16 +214,17 @@ class multipleData(APIView):
 def uploadFile(request):
     # HigherEdDataBase is the raw records provided by the users
     print(request.data.get('data'))
-    filterCheck= HigherEdDatabase.objects.filter( yearTerm=request.data.get('yearTermF'), academicType=request.data.get('academicTypeF'), studentType=request.data.get('studentTypeF'))
-    if len(filterCheck)>0:
-        filterCheck=filterCheck[0]
-        filterCheck.data=request.data.get('data')
-        filterCheck.yearTerm=request.data.get('yearTermF')
-        filterCheck.academicType=request.data.get('academicTypeF')
-        filterCheck.studentType =request.data.get('studentTypeF')
+    filterCheck = HigherEdDatabase.objects.filter(yearTerm=request.data.get(
+        'yearTermF'), academicType=request.data.get('academicTypeF'), studentType=request.data.get('studentTypeF'))
+    if len(filterCheck) > 0:
+        filterCheck = filterCheck[0]
+        filterCheck.data = request.data.get('data')
+        filterCheck.yearTerm = request.data.get('yearTermF')
+        filterCheck.academicType = request.data.get('academicTypeF')
+        filterCheck.studentType = request.data.get('studentTypeF')
         filterCheck.amountOfStudents = request.data.get('amountOfStudents')
-        filterCheck.academicLabel=request.data.get('academicLabel')
-        filterCheck.pubDate= timezone.now()
+        filterCheck.academicLabel = request.data.get('academicLabel')
+        filterCheck.pubDate = timezone.now()
         filterCheck.save()
         return Response(filterCheck.id)
     newData = HigherEdDatabase(data=request.data.get('data'), yearTerm=request.data.get('yearTermF'), academicType=request.data.get('academicTypeF'), studentType=request.data.get(
@@ -247,11 +248,27 @@ def trainModel(request):
     [sigma, beta, alpha, lmbd] = particleSwarmOptimization(
         request, nStudents, excelData)
     graph = cohortTrain(nStudents, sigma, beta, alpha,
-                        isTransfer=False, isMarkov=False, steadyStateTrigger=False, excelData=excelData)
-    # schoolData = predictionType.objects.filter(UniqueID = uniqueID)
-    newdata = predictionType(UniqueID=uniqueID, sigma=sigma, alpha=alpha,
-                             beta=beta, lmbda=lmbd, numberOfStudents=nStudents, pubDate=timezone.now())
-    newdata.save()
+                        isTransfer=False, isMarkov=False, steadyStateTrigger=False, excelData=excelData, retrieveX=False)
+
+    # Check if entry in prediction type database already exists
+    filterCheck = predictionType.objects.filter(
+        UniqueID=uniqueID)
+    # If we get a query back, we update the entry
+    if len(filterCheck) > 0:
+        filterCheck = filterCheck[0]
+        filterCheck.sigma = sigma
+        filterCheck.alpha = alpha
+        filterCheck.beta = beta
+        filterCheck.lmbda = lmbd
+        filterCheck.numberOfStudents = nStudents
+        filterCheck.pubDate = timezone.now()
+        filterCheck.save()
+
+    # Else just create a new entry
+    else:
+        newdata = predictionType(UniqueID=uniqueID, sigma=sigma, alpha=alpha,
+                                 beta=beta, lmbda=lmbd, numberOfStudents=nStudents, pubDate=timezone.now())
+        newdata.save()
     return Response(graph)
 
 
@@ -275,7 +292,7 @@ class testData(APIView):  # gradRate
     # Send a schools test data to the oracle
     def get(self, request, incomingStudents):
         data = cohortTrain(incomingStudents, 0.02, 0.05,
-                           0.15, isTransfer=False, isMarkov=False, steadyStateTrigger=False, excelData={})
+                           0.15, isTransfer=False, isMarkov=False, steadyStateTrigger=False, excelData={}, retrieveX=False)
         totalGraphs = {'NumOfFigures': len(data), 'Figures': data}
         # json_dump = json.dumps(totalGraphs, cls=NumpyEncoder)
         return Response(totalGraphs)
@@ -301,29 +318,28 @@ class getAcademicLabelFromYear(APIView):
 # Filters the academic label for the snapshort charts
 
 
-
 class getAcademicLabelFromYearAll(APIView):
     def get(self, request, getYearTerm):
         years_back = 5
         queried_data = []
-        temp_list=[]
+        temp_list = []
         for i in range(1, years_back+1):
             fall_yearterm = "FALL " + str(int(getYearTerm) - i)
             spring_yearterm = "SPRING " + str(int(getYearTerm) - i)
-
             fall_list = list(HigherEdDatabase.objects.filter(
-                yearTerm=fall_yearterm).values('academicLabel','academicType').distinct())
+                yearTerm=fall_yearterm).values('academicLabel', 'academicType').distinct())
             spring_list = list(HigherEdDatabase.objects.filter(
-                yearTerm=spring_yearterm).values('academicLabel','academicType').distinct())
+                yearTerm=spring_yearterm).values('academicLabel', 'academicType').distinct())
             print(spring_yearterm)
-            print (spring_list)
+            print(spring_list)
             if (fall_list != []):
                 queried_data.append(fall_list)
             if (spring_list != []):
                 queried_data.append(spring_list)
-        print (queried_data)
-        print (len(queried_data))
+        print(queried_data)
+        print(len(queried_data))
         return Response(queried_data)
+
 
 class getYearTerm(APIView):
     # permission_classes = (IsAuthenticated, )
@@ -350,7 +366,6 @@ class getAcademicType(APIView):
         return Response(list(queryResult))
 
 
-
 # Getting the prediction data and student numbers based on the user's input
 
 
@@ -371,7 +386,7 @@ class getPredictionData(APIView):
         excelDataObj = eval(excelData[0].data)
         higherEdId = excelData[0].id
         data = cohortTrain(prediction[0].numberOfStudents, prediction[0].sigma,
-                           prediction[0].alpha, prediction[0].beta, isTransfer=False, isMarkov=False, steadyStateTrigger=False, excelData=excelDataObj)
+                           prediction[0].alpha, prediction[0].beta, isTransfer=False, isMarkov=False, steadyStateTrigger=False, excelData=excelDataObj, retrieveX=False)
         totalGraphs = {'NumOfFigures': len(data), 'Figures': data, 'MetaData': {
             'numberOfStudents': prediction[0].numberOfStudents, 'sigma': prediction[0].sigma, 'alpha': prediction[0].alpha, 'beta': prediction[0].beta}, 'higherEdId': higherEdId}
         return Response(totalGraphs)
@@ -383,43 +398,75 @@ class getModifiedChartCohort(APIView):
     def get(self, request, numberOfStudents, sigma, alpha, beta, steady, higherEdId):
         queryResult = HigherEdDatabase.objects.filter(id=higherEdId)
         excelDataObj = eval(queryResult[0].data)
-        print(excelDataObj)
         tempBool = True if steady == "True" else False
         data = cohortTrain(int(numberOfStudents), float(sigma), float(alpha),
-                           float(beta), isTransfer=False, isMarkov=False, steadyStateTrigger=tempBool, excelData=excelDataObj)
+                           float(beta), isTransfer=False, isMarkov=False, steadyStateTrigger=tempBool, excelData=excelDataObj, retrieveX=False)
 
         totalGraphs = {'NumOfFigures': len(data), 'Figures': data, 'MetaData': {
             'numberOfStudents': numberOfStudents, 'sigma': sigma, 'alpha': alpha, 'beta': beta}}
         return Response(totalGraphs)
 
 # This class we get a graph depending on the value given to the steady state (p)
+
+
 class getSnapshotData(APIView):
-    def get (self, request, getYearTerm, getAcademicType):
-        # FALL 16
-        # FALL 17
-        fall_yearterm = "FALL " +str(int(getYearTerm)-5)
-        spring_yearterm = "SPRING " +str(int(getYearTerm)-5)
-        fall_list = list(HigherEdDatabase.objects.filter(
-               yearTerm__gte=fall_yearterm, academicType = getAcademicType).values('id').distinct())
-        spring_list = list(HigherEdDatabase.objects.filter(
-               yearTerm__gte=spring_yearterm, academicType = getAcademicType).values('id').distinct())
-        
-        for i in fall_list:
-            print (i['id'])
-            # using higher ed id retrieve the prediction data and then get highest value among them
-            # store that chosen predicdata in list
+    def get(self, request, getYearTerm, getAcademicType):
+        years_back = 5
+
+        fall_list = []
+        spring_list = []
+
+        available_terms = []
+        for i in range(years_back):
+            fall_yearterm = "FALL " + str(int(getYearTerm) - years_back + i)
+            print(fall_yearterm)
+            spring_yearterm = "SPRING " + \
+                str(int(getYearTerm) - years_back + i)
+            temp_fall_list = list(HigherEdDatabase.objects.filter(
+                yearTerm=fall_yearterm, academicType=getAcademicType).values('id', 'data', 'studentType').distinct())
+            temp_spring_list = list(HigherEdDatabase.objects.filter(
+                yearTerm=spring_yearterm, academicType=getAcademicType).values('id', 'data', 'studentType').distinct())
+            if (temp_fall_list != []):
+                available_terms.append(fall_yearterm)
+                fall_list.append(temp_fall_list[0])
+            if (temp_spring_list != []):
+                available_terms.append(spring_yearterm)
+                spring_list.append(temp_spring_list[0])
+
+        fall_prediction_list = []
+        spring_prediction_list = []
+
+        for higheredObj in fall_list:
+            prediction = predictionType.objects.filter(
+                UniqueID=higheredObj['id']).values()
+            fall_prediction_list.append(list(prediction)[0])
+
+        for higherEdObj in spring_list:
+            prediction = predictionType.objects.filter(
+                UniqueID=higheredObj['id']).values()
+            spring_prediction_list.append(list(prediction)[0])
+
+        for i in range(len(fall_prediction_list)):
+            transfer_bool = True if fall_list[i]['studentType'] == "TRANSFER" else False
+            data = cohortTrain(fall_prediction_list[i]['numberOfStudents'], float(fall_prediction_list[i]['sigma']), float(fall_prediction_list[i]['alpha']),
+                               float(fall_prediction_list[i]['beta']), isTransfer=transfer_bool, isMarkov=False, steadyStateTrigger=False, excelData=fall_list[i]['data'], retrieveX=True)
+
+            # for i in range(len(available_terms)):
+            #     print(available_terms[i],
+            #           fall_prediction_list[i]['numberOfStudents'])
+
+        # using higher ed id retrieve the prediction data and then get highest value among them
+        # store that chosen predicdata in list
         # repeat for spring
 
-
         # filter () DONE
-        #computer science of all 5 years [] DONE
-        #Cohort Model (nStudents, s, b, a, isTransfer, isMarkov, steadyStateTrigger, excelData, retrieve x)
+        # computer science of all 5 years [] DONE
+        # Cohort Model (nStudents, s, b, a, isTransfer, isMarkov, steadyStateTrigger, excelData, retrieve x)
         # add x to a list (offset could be done here)
         # ende loop
         # add every x of the list
         # return graph
-        return Response ('response')
-        
+        return Response('response')
 
 
 @ api_view(["POST"])
@@ -461,6 +508,7 @@ class CustomPasswordResetView:
             [reset_password_token.user.email]
         )
         msg.send()
+
 
 class CustomPasswordTokenVerificationView(APIView):
     """

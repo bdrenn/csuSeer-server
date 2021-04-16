@@ -76,7 +76,7 @@ urlpatterns = [
 
     # Path for getting all year terms
     # path('getYearTermAll/',
-    #      views.getYearTermAll.as_view(), name='getYearTermAll'), 
+    #      views.getYearTermAll.as_view(), name='getYearTermAll'),
     # Path for getting all the academic types based on previos selections
     path('getAcademicType/<str:getStudentType>/<str:getYearTerm>/<str:getAcademicLabel>/',
          views.getAcademicType.as_view(), name='getAcademicType'),
@@ -89,6 +89,8 @@ urlpatterns = [
     path('getSnapshotData/<str:getYearTerm>/<str:getAcademicType>/',
          views.getSnapshotData.as_view(), name='getSnapshotData'),
 
+    path('getModifiedChartCohort/<str:numberOfStudents>/<str:sigma>/<str:alpha>/<str:beta>/<str:steady>/<str:higherEdId>',
+         views.getModifiedChartCohort.as_view(), name='getModifiedChartCohort'),
 
     # Path for password reset
     path('account-reset-validate/verify-token/', views.CustomPasswordTokenVerificationView.as_view(),
