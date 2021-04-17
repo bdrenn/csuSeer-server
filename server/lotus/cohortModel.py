@@ -102,13 +102,14 @@ def cohortTrain(nStudents, s, b, a, isTransfer, isMarkov, steadyStateTrigger, ex
         # print(x_advance)
         graduated[0, t] = np.sum(x_advance[s, 0:t+1])
 
+        # TODO work on these lines
         # Assuming student taking 15 units
         # Sum of all the units
-        number_of_units_attempted[0, t] = (1 - h) * (np.sum(y[0, t]) - np.sum(x_slowed[:, t])) * 15 + (h) * np.sum(
-            (x[:, t] - x_slowed[:, t]) * np.transpose(COEUnits))
+        # number_of_units_attempted[0, t] = (1 - h) * (np.sum(y[0, t]) - np.sum(x_slowed[:, t])) * 15 + (h) * np.sum(
+        #     (x[:, t] - x_slowed[:, t]) * np.transpose(COEUnits))
         # Sum for DFW
-        number_of_units_DFWed[0, t] = (1 - h) * np.sum(x_DFW[:, t] * 15) + h * np.sum(
-            x_DFW[:, t] * np.transpose(COEUnits))
+        # number_of_units_DFWed[0, t] = (1 - h) * np.sum(x_DFW[:, t] * 15) + h * np.sum(
+        #     x_DFW[:, t] * np.transpose(COEUnits))
 
     ###COHORT CALCULATIONS###
     if p <= 0:
@@ -178,30 +179,40 @@ def cohortTrain(nStudents, s, b, a, isTransfer, isMarkov, steadyStateTrigger, ex
     data = {}
     y = y[0]
     # y = np.delete(y,0)
-    y= y[1:]
+    y = y[1:]
     graduating = graduating[1:]
-    x1 = x[1][1:]
-    x2 = x[2][1:]
-    x3 = x[3][1:]
-    x4 = x[4][1:]
-    x5 = x[5][1:]
-    x6 = x[6][1:]
-    x7 = x[7][1:]
-    x8 = x[8][1:]
+
+    if isTransfer:
+        x1 = x[1][1:] * 0
+        x2 = x[2][1:] * 0
+        x3 = x[3][1:] * 0
+        x4 = x[4][1:] * 0
+        print(x4)
+        x5 = x[1][1:]
+        x6 = x[2][1:]
+        x7 = x[3][1:]
+        x8 = x[4][1:]
+    else:
+        x1 = x[1][1:]
+        x2 = x[2][1:]
+        x3 = x[3][1:]
+        x4 = x[4][1:]
+        x5 = x[5][1:]
+        x6 = x[6][1:]
+        x7 = x[7][1:]
+        x8 = x[8][1:]
 
     # This is returning x to be used for the snapshot charts
-    if retrieveX: 
+    if retrieveX:
         return x
 
-    cohortpersistance[0] = [x *100 for x in cohortpersistance[0]]
-    cohortretention[0] =[x *100 for x in cohortretention[0]]
-    cohortgrad[0] =[x *100 for x in cohortgrad[0]]
-
+    cohortpersistance[0] = [x * 100 for x in cohortpersistance[0]]
+    cohortretention[0] = [x * 100 for x in cohortretention[0]]
+    cohortgrad[0] = [x * 100 for x in cohortgrad[0]]
 
     if isMarkov:
         graduated = graduated[0]
         cohortpersistance = cohortpersistance[0]
-        
 
         data['graduated_data'] = [graduated[0], graduated[1], graduated[2], graduated[3], graduated[4], graduated[5],
                                   graduated[6], graduated[7], graduated[8], graduated[9], graduated[10], graduated[11], graduated[12]]
@@ -209,45 +220,53 @@ def cohortTrain(nStudents, s, b, a, isTransfer, isMarkov, steadyStateTrigger, ex
                                     cohortpersistance[6], cohortpersistance[7], cohortpersistance[8], cohortpersistance[9], cohortpersistance[10], cohortpersistance[11], cohortpersistance[12]]
         # data = [graduated[1], graduated[2], graduated[3], graduated[4], graduated[5], graduated[6],
         #         graduated[7], graduated[8], graduated[9], graduated[10], graduated[11], graduated[12], graduated[13]]
-    
+
     else:
         data = {'figure1': {'x-axis': time, 'persistence': (y, '#000000'), 'coeGrad': (graduating, '#E69F00'),
-                    'description': '(TODO) Description of figure1', 'yLabel': 'Number of Students'},
+                            'description': '(TODO) Description of figure1', 'yLabel': 'Number of Students'},
                 'figure2': {'x-axis': time, '0% achieved': (x1, '#000000'), '12.5% achieved': (x2, '#E69F00'),
-                    '25% achieved': (x3, '#56B4E9'), '37.5% achieved': (x4, '#009E73'), '50% achieved': (x5, '#F0E442'),
-                    '62.5% achieved': (x6, '#0072B2'), '75% achieved': (x7, '#D55E00'), '87.5% achieved': (x8, '#CC79A7'),
-                    'description': '(TODO) Description of figure2', 'yLabel': 'Number of Students in Each Class'},
+                            '25% achieved': (x3, '#56B4E9'), '37.5% achieved': (x4, '#009E73'), '50% achieved': (x5, '#F0E442'),
+                            '62.5% achieved': (x6, '#0072B2'), '75% achieved': (x7, '#D55E00'), '87.5% achieved': (x8, '#CC79A7'),
+                            'description': '(TODO) Description of figure2', 'yLabel': 'Number of Students in Each Class'},
                 'figure3': {'x-axis': time, '0% achieved': ((x1 + x2) / 2, '#000000'),
                             '25% achieved': ((x3 + x4) / 2, '#E69F00'),
                             '50% achieved': ((x5 + x6) / 2, '#56B4E9'),
-                            '75% achieved': ((x7 + x8) / 2, '#009E73'), 'description': ["(TODO) Description of figure3 (TODO) Description of figure3(TODO)" ,"Description of figure3(TODO)"],
+                            '75% achieved': ((x7 + x8) / 2, '#009E73'), 'description': ["(TODO) Description of figure3 (TODO) Description of figure3(TODO)", "Description of figure3(TODO)"],
                             'yLabel': 'Number of Students'}}
         # 'figure3': {'x-axis': time, 'persistance': (cohortpersistance[0], '#000000'),
         #             'retention': (cohortretention[0], '#E69F00'), 'graduation': (cohortgrad[0], '#56B4E9'),
         #             'description': 'figure3', 'yLabel': 'Persistance, Retention, and Graduation (%)'}}
         if p != 1:
-            excelData['PERSIST COUNT'] = removeTrailingZeroes(excelData['PERSIST COUNT'])
-            excelData['RETENTION COUNT'] = removeTrailingZeroes(excelData['RETENTION COUNT'])
-            excelData['RETENTION COUNT'] = excelData['RETENTION COUNT'] [0:len(excelData['PERSIST COUNT'])]
-            excelData['GRADUATION COUNT']= removeTrailingZeroes(excelData['GRADUATION COUNT'])
-            excelData['GRADUATION COUNT'] = excelData['GRADUATION COUNT'][0:len(excelData['PERSIST COUNT'])]
+            excelData['PERSIST COUNT'] = removeTrailingZeroes(
+                excelData['PERSIST COUNT'])
+            excelData['RETENTION COUNT'] = removeTrailingZeroes(
+                excelData['RETENTION COUNT'])
+            excelData['RETENTION COUNT'] = excelData['RETENTION COUNT'][0:len(
+                excelData['PERSIST COUNT'])]
+            excelData['GRADUATION COUNT'] = removeTrailingZeroes(
+                excelData['GRADUATION COUNT'])
+            excelData['GRADUATION COUNT'] = excelData['GRADUATION COUNT'][0:len(
+                excelData['PERSIST COUNT'])]
 
-            excelPersistance = [ (i/excelData['HEADCOUNT'][0])*100 for i in excelData['PERSIST COUNT']]
-            excelRetention = [ (i/excelData['HEADCOUNT'][0])*100 for i in excelData['RETENTION COUNT']]
-            excelGrad = [(i/excelData['HEADCOUNT'][0])*100 for i in excelData['GRADUATION COUNT']]
+            excelPersistance = [(i/excelData['HEADCOUNT'][0])
+                                * 100 for i in excelData['PERSIST COUNT']]
+            excelRetention = [(i/excelData['HEADCOUNT'][0])
+                              * 100 for i in excelData['RETENTION COUNT']]
+            excelGrad = [(i/excelData['HEADCOUNT'][0]) *
+                         100 for i in excelData['GRADUATION COUNT']]
             # excelPersistance = [
             #     (i / j) *100 for i, j in zip(excelData['PERSIST COUNT'], excelData['HEADCOUNT'])]
             # excelRetention = [
             #     (i / j)*100  for i, j in zip(excelData['RETENTION COUNT'], excelData['HEADCOUNT'])]
             # excelGrad = [
             #     (i / j)*100  for i, j in zip(excelData['GRADUATION COUNT'], excelData['HEADCOUNT'])]
-            data['figure4'] ={'x-axis': time, 'Model Persistence': (cohortpersistance[0] , '#000000', 'true'),
-                                'Model Retention': (cohortretention[0], '#E69F00', 'true'),
-                                'Model Graduation': (cohortgrad[0], '#56B4E9', 'true'),
-                                'description': '(TODO) Description of  figure4', 'yLabel': 'Persistance, Retention, and Graduation (%)', 
-                                'Persistance Data (Circle)': (excelPersistance, '#000000', 'false'),
-                                'Retention Data (Circle)': (excelRetention, '#E69F00', 'false'), 
-                                'Graduation Data (Circle)': (excelGrad, '#56B4E9', 'false')}
+            data['figure4'] = {'x-axis': time, 'Model Persistence': (cohortpersistance[0], '#000000', 'true'),
+                               'Model Retention': (cohortretention[0], '#E69F00', 'true'),
+                               'Model Graduation': (cohortgrad[0], '#56B4E9', 'true'),
+                               'description': '(TODO) Description of  figure4', 'yLabel': 'Persistance, Retention, and Graduation (%)',
+                               'Persistance Data (Circle)': (excelPersistance, '#000000', 'false'),
+                               'Retention Data (Circle)': (excelRetention, '#E69F00', 'false'),
+                               'Graduation Data (Circle)': (excelGrad, '#56B4E9', 'false')}
             # data = {'figure1': {'x-axis': time, 'persistence': (y, '#000000'), 'students graduating': (graduating, '#E69F00'),
             #                     'description': 'figure1', 'yLabel': 'Number of Students'},
             #        'figure2': {'x-axis': time, 'f1': (x1, '#000000'), 'f2': (x2, '#E69F00'),
@@ -256,8 +275,8 @@ def cohortTrain(nStudents, s, b, a, isTransfer, isMarkov, steadyStateTrigger, ex
             #                     'description': 'figure2', 'yLabel': 'Number of Students in Each Class'},
             #         'figure3': {'x-axis': time, 'persistance': (cohortpersistance[0] , '#000000', 'true'),
             #                     'retention': (cohortretention[0], '#E69F00', 'true'), 'graduation': (cohortgrad[0], '#56B4E9', 'true'),
-            #                     'description': 'figure3', 'yLabel': 'Persistance, Retention, and Graduation (decimal)', 
-            #                     'persistanceExcelData': (excelPersistance, '#000000', 'false'), 'retentionExcelData': (excelRetention, '#E69F00', 'false'), 
+            #                     'description': 'figure3', 'yLabel': 'Persistance, Retention, and Graduation (decimal)',
+            #                     'persistanceExcelData': (excelPersistance, '#000000', 'false'), 'retentionExcelData': (excelRetention, '#E69F00', 'false'),
             #                     'graduationExcelData': (excelGrad, '#56B4E9', 'false')},
             #         'figure4': {'x-axis': time, '0-29units': ((x1 + x2) / 2, '#000000'),
             #                     '30-59units': ((x3 + x4) / 2, '#E69F00'),
@@ -265,11 +284,12 @@ def cohortTrain(nStudents, s, b, a, isTransfer, isMarkov, steadyStateTrigger, ex
             #                     '90-119units': ((x7 + x8) / 2, '#009E73'), 'description': 'figure4', 'yLabel': 'Number of Students'}}
     return data
 
+
 def removeTrailingZeroes(_list):
-    i =len(_list)-1
-    while(i>=0):
-        if _list[i]==0:
-            i-=1
+    i = len(_list)-1
+    while(i >= 0):
+        if _list[i] == 0:
+            i -= 1
         else:
             return _list[0:i+1]
     return _list

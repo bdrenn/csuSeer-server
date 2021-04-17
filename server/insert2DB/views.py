@@ -413,60 +413,96 @@ class getSnapshotData(APIView):
     def get(self, request, getYearTerm, getAcademicType):
         years_back = 5
 
-        fall_list = []
-        spring_list = []
-
+        term_list = []
         available_terms = []
+
         for i in range(years_back):
             fall_yearterm = "FALL " + str(int(getYearTerm) - years_back + i)
             print(fall_yearterm)
             spring_yearterm = "SPRING " + \
                 str(int(getYearTerm) - years_back + i)
             temp_fall_list = list(HigherEdDatabase.objects.filter(
-                yearTerm=fall_yearterm, academicType=getAcademicType).values('id', 'data', 'studentType').distinct())
+                yearTerm=fall_yearterm, academicType=getAcademicType).values('id', 'data', 'studentType', 'yearTerm').distinct())
             temp_spring_list = list(HigherEdDatabase.objects.filter(
-                yearTerm=spring_yearterm, academicType=getAcademicType).values('id', 'data', 'studentType').distinct())
+                yearTerm=spring_yearterm, academicType=getAcademicType).values('id', 'data', 'studentType', 'yearTerm').distinct())
             if (temp_fall_list != []):
                 available_terms.append(fall_yearterm)
-                fall_list.append(temp_fall_list[0])
+                term_list.append(temp_fall_list[0])
             if (temp_spring_list != []):
                 available_terms.append(spring_yearterm)
-                spring_list.append(temp_spring_list[0])
+                term_list.append(temp_spring_list[0])
 
-        fall_prediction_list = []
-        spring_prediction_list = []
+        prediction_list = []
 
-        for higheredObj in fall_list:
+        for higheredObj in term_list:
             prediction = predictionType.objects.filter(
                 UniqueID=higheredObj['id']).values()
-            fall_prediction_list.append(list(prediction)[0])
+            prediction_list.append(list(prediction)[0])
 
-        for higherEdObj in spring_list:
-            prediction = predictionType.objects.filter(
-                UniqueID=higheredObj['id']).values()
-            spring_prediction_list.append(list(prediction)[0])
+        for i in range(len(available_terms)):
+            higherEd_obj = None
+            prediction = None
 
-        for i in range(len(fall_prediction_list)):
-            transfer_bool = True if fall_list[i]['studentType'] == "TRANSFER" else False
-            data = cohortTrain(fall_prediction_list[i]['numberOfStudents'], float(fall_prediction_list[i]['sigma']), float(fall_prediction_list[i]['alpha']),
-                               float(fall_prediction_list[i]['beta']), isTransfer=transfer_bool, isMarkov=False, steadyStateTrigger=False, excelData=fall_list[i]['data'], retrieveX=True)
+            for obj in term_list:
+                if obj['yearTerm'] == available_terms[i]:
+                    higherEd_obj = obj
+                    break
 
-            # for i in range(len(available_terms)):
-            #     print(available_terms[i],
-            #           fall_prediction_list[i]['numberOfStudents'])
+            for term_prediction in prediction_list:
+                if term_prediction['UniqueID'] == str(higherEd_obj["id"]):
+                    prediction = term_prediction
+                    break
 
-        # using higher ed id retrieve the prediction data and then get highest value among them
-        # store that chosen predicdata in list
-        # repeat for spring
+            transfer_bool = True if higherEd_obj['studentType'] == "TRANSFER" else False
+            fall_x_data = cohortTrain(prediction['numberOfStudents'], float(prediction['sigma']), float(prediction['alpha']),
+                                      float(prediction['beta']), isTransfer=transfer_bool, isMarkov=False, steadyStateTrigger=False, excelData=higherEd_obj['data'], retrieveX=True)
+            fall_x_data = list(fall_x_data)
 
-        # filter () DONE
-        # computer science of all 5 years [] DONE
-        # Cohort Model (nStudents, s, b, a, isTransfer, isMarkov, steadyStateTrigger, excelData, retrieve x)
-        # add x to a list (offset could be done here)
-        # ende loop
-        # add every x of the list
-        # return graph
-        return Response('response')
+            if i == 0:
+                first_x_data = fall_x_data
+                for index in range(1, len(first_x_data)):
+                    first_x_data[index] = list(first_x_data[index][1:])
+                    print(first_x_data[index])
+
+            first_term = available_terms[0]
+
+            if i != 0:
+                av_term = available_terms[i]
+                grab_first_year = int(
+                    first_term[(len(first_term)-2): len(first_term)])
+                grab_next_year = int(av_term[(len(av_term)-2): len(av_term)])
+
+                padding_times = (2 *
+                                 (grab_next_year-grab_first_year)) if first_term[0] == available_terms[i][0] else 2 * (
+                    grab_next_year-grab_first_year) - 1
+
+                for time in range(padding_times):
+                    for j in range(len(fall_x_data)):
+                        if time == 0:
+                            fall_x_data[j] = list(fall_x_data[j][1:])
+                        fall_x_data[j].insert(0, 0)
+
+                for index in range(1, len(first_x_data)):
+                    for j in range(1, len(first_x_data[1])):
+                        first_x_data[index][j] = first_x_data[index][j] + \
+                            fall_x_data[index][j]
+                print(fall_x_data)
+
+        for index in range(len(first_x_data)):
+            first_x_data[index] = np.array(first_x_data[index])
+        print(available_terms)
+
+        data = {'NumOfFigures': 2, 'Figures': {'figure2': {'x-axis': time, '0% achieved': (first_x_data[1], '#000000'), '12.5% achieved': (first_x_data[2], '#E69F00'),
+                                                           '25% achieved': (first_x_data[3], '#56B4E9'), '37.5% achieved': (first_x_data[4], '#009E73'), '50% achieved': (first_x_data[5], '#F0E442'),
+                                                           '62.5% achieved': (first_x_data[6], '#0072B2'), '75% achieved': (first_x_data[7], '#D55E00'), '87.5% achieved': (first_x_data[8], '#CC79A7'),
+                                                           'description': '(TODO) Description of figure2', 'yLabel': 'Number of Students in Each Class'},
+                                               'figure3': {'x-axis': time, '0% achieved': ((first_x_data[1] + first_x_data[2]) / 2, '#000000'),
+                                                           '25% achieved': ((first_x_data[3] + first_x_data[4]) / 2, '#E69F00'),
+                                                           '50% achieved': ((first_x_data[5] + first_x_data[6]) / 2, '#56B4E9'),
+                                                           '75% achieved': ((first_x_data[7] + first_x_data[8]) / 2, '#009E73'), 'description': ["(TODO) Description of figure3 (TODO) Description of figure3(TODO)", "Description of figure3(TODO)"],
+                                                           'yLabel': 'Number of Students'}}}
+
+        return Response(data)
 
 
 @ api_view(["POST"])
