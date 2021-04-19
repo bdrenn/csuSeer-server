@@ -185,12 +185,12 @@ def cohortTrain(nStudents, s, b, a, isTransfer, isMarkov, steadyStateTrigger, ex
 
     x_ = []
     if isTransfer:
-        for i in range(0, 5):
+        for i in range(1, 5):
             x_.append(list(x[i][1:] * 0))
         for i in range(1, 5):
             x_.append(list(x[i][1:]))
     else:
-        for i in range(0, 9):
+        for i in range(1, 9):
             x_.append(list(x[i][1:]))
     x_ = np.array(x_)
 
@@ -216,14 +216,14 @@ def cohortTrain(nStudents, s, b, a, isTransfer, isMarkov, steadyStateTrigger, ex
     else:
         data = {'figure1': {'x-axis': time, 'persistence': (y, '#000000'), 'coeGrad': (graduating, '#E69F00'),
                             'description': ['Figure1', 'Student Persistence and Graduation Count within University'], 'yLabel': 'Number of Students'},
-                'figure2': {'x-axis': time, '0% achieved': (x_[1], '#000000'), '12.5% achieved': (x_[2], '#E69F00'),
-                            '25% achieved': (x_[3], '#56B4E9'), '37.5% achieved': (x_[4], '#009E73'), '50% achieved': (x_[5], '#F0E442'),
-                            '62.5% achieved': (x_[6], '#0072B2'), '75% achieved': (x_[7], '#D55E00'), '87.5% achieved': (x_[8], '#CC79A7'),
+                'figure2': {'x-axis': time, '0% achieved': (x_[0], '#000000'), '12.5% achieved': (x_[1], '#E69F00'),
+                            '25% achieved': (x_[2], '#56B4E9'), '37.5% achieved': (x_[3], '#009E73'), '50% achieved': (x_[4], '#F0E442'),
+                            '62.5% achieved': (x_[5], '#0072B2'), '75% achieved': (x_[6], '#D55E00'), '87.5% achieved': (x_[7], '#CC79A7'),
                             'description': ['Figure 2', 'Student Count in DCMs within University'], 'yLabel': 'Number of Students in Each Class'},
-                'figure3': {'x-axis': time, '0% achieved': ((x_[1] + x_[2]) / 2, '#000000'),
-                            '25% achieved': ((x_[3] + x_[4]) / 2, '#E69F00'),
-                            '50% achieved': ((x_[5] + x_[6]) / 2, '#56B4E9'),
-                            '75% achieved': ((x_[7] + x_[8]) / 2, '#009E73'), 'description': ['Figure 3', 'Student Count in Super DCMs within University'],
+                'figure3': {'x-axis': time, '0% achieved': ((x_[0] + x_[1]) / 2, '#000000'),
+                            '25% achieved': ((x_[2] + x_[3]) / 2, '#E69F00'),
+                            '50% achieved': ((x_[4] + x_[5]) / 2, '#56B4E9'),
+                            '75% achieved': ((x_[6] + x_[7]) / 2, '#009E73'), 'description': ['Figure 3', 'Student Count in Super DCMs within University'],
                             'yLabel': 'Number of Students'}}
 
         if p != 1:
