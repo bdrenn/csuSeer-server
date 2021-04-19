@@ -10,14 +10,17 @@ import matplotlib.pyplot as plt
 from pyswarms.utils.plotters.formatters import Mesher
 
 
-def particleSwarmOptimization(request, nStudents, excelData):
+def particleSwarmOptimization(request, nStudents, excelData, isTransfer):
 
     # hyperparameters and bounds
     # edit each position to have a more accurate upper bound (and lower bound maybe)
     # x_max = 1 * np.ones(4)
-    # sigma, Beta, alpha, 
-    x_max = np.array([0.035,0.125,0.0005,1])
-    x_min = np.array([0.01,0.116,0,0])
+    # sigma, Beta, alpha,
+
+    # Ask if ok for presentation, this helps the fit better for transfer and freshmen
+    beta = 0.35 if isTransfer else 0.125
+    x_max = np.array([0.035, beta, 0.0005, 1])
+    x_min = np.array([0.01, 0.116, 0, 0])
     bounds = (x_min, x_max)
     # instatiate the optimizer
     options = {'c1': .5, 'c2': .6, 'w': .8}

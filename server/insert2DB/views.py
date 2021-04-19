@@ -243,12 +243,15 @@ def uploadFile(request):
 def trainModel(request):
     uniqueID = request.data.get('uniqueID')
     schoolData = HigherEdDatabase.objects.filter(id=uniqueID)
+    print(schoolData)
+    print(schoolData[0].studentType)
+    isTransfer = True if schoolData[0].studentType == "TRANSFER" else False
     excelData = eval(schoolData[0].data)
     nStudents = int(request.data.get('amountOfStudents'))
     [sigma, beta, alpha, lmbd] = particleSwarmOptimization(
-        request, nStudents, excelData)
+        request, nStudents, excelData, isTransfer)
     graph = cohortTrain(nStudents, sigma, beta, alpha,
-                        isTransfer=False, isMarkov=False, steadyStateTrigger=False, excelData=excelData, retrieveX=False)
+                        isTransfer=isTransfer, isMarkov=False, steadyStateTrigger=False, excelData=excelData, retrieveX=False)
 
     # Check if entry in prediction type database already exists
     filterCheck = predictionType.objects.filter(
@@ -383,10 +386,11 @@ class getPredictionData(APIView):
         # if len(queryPrediction) > 0:
         #     prediction = max(list(queryPrediction))
         excelData = HigherEdDatabase.objects.filter(id=higherEdId)
+        isTransfer = True if excelData[0].studentType == 'TRANSFER' else False
         excelDataObj = eval(excelData[0].data)
         higherEdId = excelData[0].id
         data = cohortTrain(prediction[0].numberOfStudents, prediction[0].sigma,
-                           prediction[0].alpha, prediction[0].beta, isTransfer=False, isMarkov=False, steadyStateTrigger=False, excelData=excelDataObj, retrieveX=False)
+                           prediction[0].alpha, prediction[0].beta, isTransfer=isTransfer, isMarkov=False, steadyStateTrigger=False, excelData=excelDataObj, retrieveX=False)
         totalGraphs = {'NumOfFigures': len(data), 'Figures': data, 'MetaData': {
             'numberOfStudents': prediction[0].numberOfStudents, 'sigma': prediction[0].sigma, 'alpha': prediction[0].alpha, 'beta': prediction[0].beta}, 'higherEdId': higherEdId}
         return Response(totalGraphs)
@@ -397,10 +401,11 @@ class getModifiedChartCohort(APIView):
 
     def get(self, request, numberOfStudents, sigma, alpha, beta, steady, higherEdId):
         queryResult = HigherEdDatabase.objects.filter(id=higherEdId)
+        isTransfer = True if queryResult[0].studentType == 'TRANSFER' else False
         excelDataObj = eval(queryResult[0].data)
         tempBool = True if steady == "True" else False
         data = cohortTrain(int(numberOfStudents), float(sigma), float(alpha),
-                           float(beta), isTransfer=False, isMarkov=False, steadyStateTrigger=tempBool, excelData=excelDataObj, retrieveX=False)
+                           float(beta), isTransfer=isTransfer, isMarkov=False, steadyStateTrigger=tempBool, excelData=excelDataObj, retrieveX=False)
 
         totalGraphs = {'NumOfFigures': len(data), 'Figures': data, 'MetaData': {
             'numberOfStudents': numberOfStudents, 'sigma': sigma, 'alpha': alpha, 'beta': beta}}
@@ -418,7 +423,6 @@ class getSnapshotData(APIView):
 
         for i in range(years_back):
             fall_yearterm = "FALL " + str(int(getYearTerm) - years_back + i)
-            print(fall_yearterm)
             spring_yearterm = "SPRING " + \
                 str(int(getYearTerm) - years_back + i)
             temp_fall_list = list(HigherEdDatabase.objects.filter(
@@ -453,7 +457,7 @@ class getSnapshotData(APIView):
                     prediction = term_prediction
                     break
 
-            transfer_bool = True if higherEd_obj['studentType'] == "TRANSFER" else False
+            transfer_bool = True if higherEd_obj['studentType'] == 'TRANSFER' else False
             fall_x_data = cohortTrain(prediction['numberOfStudents'], float(prediction['sigma']), float(prediction['alpha']),
                                       float(prediction['beta']), isTransfer=transfer_bool, isMarkov=False, steadyStateTrigger=False, excelData=higherEd_obj['data'], retrieveX=True)
             fall_x_data = list(fall_x_data)
@@ -462,7 +466,6 @@ class getSnapshotData(APIView):
                 first_x_data = fall_x_data
                 for index in range(1, len(first_x_data)):
                     first_x_data[index] = list(first_x_data[index][1:])
-                    print(first_x_data[index])
 
             first_term = available_terms[0]
 
@@ -486,20 +489,36 @@ class getSnapshotData(APIView):
                     for j in range(1, len(first_x_data[1])):
                         first_x_data[index][j] = first_x_data[index][j] + \
                             fall_x_data[index][j]
-                print(fall_x_data)
 
         for index in range(len(first_x_data)):
             first_x_data[index] = np.array(first_x_data[index])
-        print(available_terms)
 
-        data = {'NumOfFigures': 2, 'Figures': {'figure2': {'x-axis': time, '0% achieved': (first_x_data[1], '#000000'), '12.5% achieved': (first_x_data[2], '#E69F00'),
+        year_terms_labels = [available_terms[0]]
+        year_fall = available_terms[0][len(
+            available_terms[0])-2: len(available_terms[0])]
+        year_spring = available_terms[0][len(
+            available_terms[0])-2: len(available_terms[0])]
+        print(year_fall)
+        print(year_spring)
+        for i in range(13):
+            if year_terms_labels[i][0] == "F":
+                year_spring = int(year_spring) + 1
+                year_terms_labels.append("SPRING " + str(year_spring))
+            else:
+                if year_terms_labels[0] == "S" and i == 0:
+                    year_terms_labels.append("FALL" + year_fall)
+                else:
+                    year_fall = int(year_fall) + 1
+                    year_terms_labels.append("FALL " + str(year_fall))
+
+        data = {'NumOfFigures': 2, 'Figures': {'figure2': {'x-axis': year_terms_labels, '0% achieved': (first_x_data[1], '#000000'), '12.5% achieved': (first_x_data[2], '#E69F00'),
                                                            '25% achieved': (first_x_data[3], '#56B4E9'), '37.5% achieved': (first_x_data[4], '#009E73'), '50% achieved': (first_x_data[5], '#F0E442'),
                                                            '62.5% achieved': (first_x_data[6], '#0072B2'), '75% achieved': (first_x_data[7], '#D55E00'), '87.5% achieved': (first_x_data[8], '#CC79A7'),
-                                                           'description': '(TODO) Description of figure2', 'yLabel': 'Number of Students in Each Class'},
-                                               'figure3': {'x-axis': time, '0% achieved': ((first_x_data[1] + first_x_data[2]) / 2, '#000000'),
+                                                           'description': ['Figure 1', 'Student Count in DCMs within University'], 'yLabel': 'Number of Students in Each Class'},
+                                               'figure3': {'x-axis': year_terms_labels, '0% achieved': ((first_x_data[1] + first_x_data[2]) / 2, '#000000'),
                                                            '25% achieved': ((first_x_data[3] + first_x_data[4]) / 2, '#E69F00'),
                                                            '50% achieved': ((first_x_data[5] + first_x_data[6]) / 2, '#56B4E9'),
-                                                           '75% achieved': ((first_x_data[7] + first_x_data[8]) / 2, '#009E73'), 'description': ["(TODO) Description of figure3 (TODO) Description of figure3(TODO)", "Description of figure3(TODO)"],
+                                                           '75% achieved': ((first_x_data[7] + first_x_data[8]) / 2, '#009E73'), 'description': ['Figure2', ' Student Count in Super DCMs within University'],
                                                            'yLabel': 'Number of Students'}}}
 
         return Response(data)
