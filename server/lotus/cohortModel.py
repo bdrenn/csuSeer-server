@@ -16,8 +16,8 @@ def cohortTrain(nStudents, s, b, a, isTransfer, isMarkov, steadyStateTrigger, ex
     # This is for when the model is already trained
     nStudents = int(nStudents)
     # n number of semesters in road map
-    n = 4 if isTransfer else 8
-
+    # n = 4 if isTransfer else 8
+    n=8
     # number of semesters to model (upper limit not worth modeling )
     k = 15
     # steady state trigger, if p=1 steady-state, p=0 only add students in year 1 	(boolean)
@@ -105,11 +105,11 @@ def cohortTrain(nStudents, s, b, a, isTransfer, isMarkov, steadyStateTrigger, ex
         # TODO work on these lines
         # Assuming student taking 15 units
         # Sum of all the units
-        number_of_units_attempted[0, t] = (1 - h) * (np.sum(y[0, t]) - np.sum(x_slowed[:, t])) * 15 + (h) * np.sum(
-            (x[:, t] - x_slowed[:, t]) * np.transpose(COEUnits))
-        Sum for DFW
-        number_of_units_DFWed[0, t] = (1 - h) * np.sum(x_DFW[:, t] * 15) + h * np.sum(
-            x_DFW[:, t] * np.transpose(COEUnits))
+        # number_of_units_attempted[0, t] = (1 - h) * (np.sum(y[0, t]) - np.sum(x_slowed[:, t])) * 15 + (h) * np.sum(
+        #     (x[:, t] - x_slowed[:, t]) * np.transpose(COEUnits))
+        # # Sum for DFW
+        # number_of_units_DFWed[0, t] = (1 - h) * np.sum(x_DFW[:, t] * 15) + h * np.sum(
+        #     x_DFW[:, t] * np.transpose(COEUnits))
 
     ###COHORT CALCULATIONS###
     if p <= 0:
@@ -182,12 +182,13 @@ def cohortTrain(nStudents, s, b, a, isTransfer, isMarkov, steadyStateTrigger, ex
     y = y[1:]
     graduating = graduating[1:]
 
+
     x_ = []
     if isTransfer:
         for i in range(0, 5):
-            x_.append(x[i][1:] * 0)
-        for i in range(5, 9):
-            x_.append(x[i][1:])
+            x_.append(list(x[i][1:] * 0))
+        for i in range(1, 5):
+            x_.append(list(x[i][1:]))
     else:
         for i in range(0, 9):
             x_.append(list(x[i][1:]))
