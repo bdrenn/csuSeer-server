@@ -464,8 +464,9 @@ class getSnapshotData(APIView):
 
             if i == 0:
                 first_x_data = fall_x_data
-                for index in range(1, len(first_x_data)):
-                    first_x_data[index] = list(first_x_data[index][1:])
+                # Here for all the ranges now we go from 0 to 7 rather than 1 to 8
+                for index in range(len(first_x_data)):
+                    first_x_data[index] = list(first_x_data[index][0:])
 
             first_term = available_terms[0]
 
@@ -478,18 +479,19 @@ class getSnapshotData(APIView):
                 padding_times = (2 *
                                  (grab_next_year-grab_first_year)) if first_term[0] == available_terms[i][0] else 2 * (
                     grab_next_year-grab_first_year) - 1
-
                 for time in range(padding_times):
                     for j in range(len(fall_x_data)):
                         if time == 0:
-                            fall_x_data[j] = list(fall_x_data[j][1:])
+                            # Here we want to access data at position j from 0 to : not 1 to :
+                            fall_x_data[j] = list(fall_x_data[j][0:])
                         fall_x_data[j].insert(0, 0)
 
-                for index in range(1, len(first_x_data)):
-                    for j in range(1, len(first_x_data[1])):
+                for index in range(len(first_x_data)):
+                    for j in range(len(first_x_data[0])):
                         first_x_data[index][j] = first_x_data[index][j] + \
                             fall_x_data[index][j]
 
+        # Loop inside?
         for index in range(len(first_x_data)):
             first_x_data[index] = np.array(first_x_data[index])
 
@@ -498,8 +500,7 @@ class getSnapshotData(APIView):
             available_terms[0])-2: len(available_terms[0])]
         year_spring = available_terms[0][len(
             available_terms[0])-2: len(available_terms[0])]
-        print(year_fall)
-        print(year_spring)
+
         for i in range(13):
             if year_terms_labels[i][0] == "F":
                 year_spring = int(year_spring) + 1
@@ -511,14 +512,14 @@ class getSnapshotData(APIView):
                     year_fall = int(year_fall) + 1
                     year_terms_labels.append("FALL " + str(year_fall))
 
-        data = {'NumOfFigures': 2, 'Figures': {'figure2': {'x-axis': year_terms_labels, '0% achieved': (first_x_data[1], '#000000'), '12.5% achieved': (first_x_data[2], '#E69F00'),
-                                                           '25% achieved': (first_x_data[3], '#56B4E9'), '37.5% achieved': (first_x_data[4], '#009E73'), '50% achieved': (first_x_data[5], '#F0E442'),
-                                                           '62.5% achieved': (first_x_data[6], '#0072B2'), '75% achieved': (first_x_data[7], '#D55E00'), '87.5% achieved': (first_x_data[8], '#CC79A7'),
+        data = {'NumOfFigures': 2, 'Figures': {'figure2': {'x-axis': year_terms_labels, '0% achieved': (first_x_data[0], '#000000'), '12.5% achieved': (first_x_data[1], '#E69F00'),
+                                                           '25% achieved': (first_x_data[2], '#56B4E9'), '37.5% achieved': (first_x_data[3], '#009E73'), '50% achieved': (first_x_data[4], '#F0E442'),
+                                                           '62.5% achieved': (first_x_data[5], '#0072B2'), '75% achieved': (first_x_data[6], '#D55E00'), '87.5% achieved': (first_x_data[7], '#CC79A7'),
                                                            'description': ['Figure 1', 'Student Count in DCMs within University'], 'yLabel': 'Number of Students in Each Class'},
-                                               'figure3': {'x-axis': year_terms_labels, '0% achieved': ((first_x_data[1] + first_x_data[2]) / 2, '#000000'),
-                                                           '25% achieved': ((first_x_data[3] + first_x_data[4]) / 2, '#E69F00'),
-                                                           '50% achieved': ((first_x_data[5] + first_x_data[6]) / 2, '#56B4E9'),
-                                                           '75% achieved': ((first_x_data[7] + first_x_data[8]) / 2, '#009E73'), 'description': ['Figure2', ' Student Count in Super DCMs within University'],
+                                               'figure3': {'x-axis': year_terms_labels, '0% achieved': ((first_x_data[0] + first_x_data[1]) / 2, '#000000'),
+                                                           '25% achieved': ((first_x_data[2] + first_x_data[3]) / 2, '#E69F00'),
+                                                           '50% achieved': ((first_x_data[4] + first_x_data[5]) / 2, '#56B4E9'),
+                                                           '75% achieved': ((first_x_data[6] + first_x_data[7]) / 2, '#009E73'), 'description': ['Figure2', ' Student Count in Super DCMs within University'],
                                                            'yLabel': 'Number of Students'}}}
 
         return Response(data)
