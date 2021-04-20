@@ -168,7 +168,8 @@ def cohortTrain(nStudents, s, b, a, isTransfer, isMarkov, steadyStateTrigger, ex
             number_of_units_DFWed[t] = (
                 1 - h) * sum(x_DFW[:, t] * 15) + h * sum(x_DFW[:, t] * np.transpose(COEUnits))
 
-    graduating = x_advance[n - 1, :]
+    # graduating = x_advance[n - 1, :]
+    graduating = x_advance[n, :]
     DataTime = [2, 4, 6, 7, 8, 10, 12]
     # college trigger, if h=1, only calc College, if = 0, calc university
     if h <= 0:
@@ -182,6 +183,8 @@ def cohortTrain(nStudents, s, b, a, isTransfer, isMarkov, steadyStateTrigger, ex
     y = y[1:]
     graduating = graduating[1:]
 
+    # Here we need to grab values from 1 to 8 for x but appends them in x_ from 0 to 7, so we needed to change values in graph as well (line 217
+    # this fixed it for transfer
     x_ = []
     if isTransfer:
         for i in range(1, 5):
