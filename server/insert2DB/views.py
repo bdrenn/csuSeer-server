@@ -423,7 +423,7 @@ class getSnapshotData(APIView):
         # List of all terms in the range of available terms as strings
         available_terms = []
 
-        for i in range(2):
+        for i in range(years_back):
             fall_yearterm = "FALL " + str(int(getYearTerm) - years_back + i)
             spring_yearterm = "SPRING " + \
                 str(int(getYearTerm) - years_back + i + 1)
