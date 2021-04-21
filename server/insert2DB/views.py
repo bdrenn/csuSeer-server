@@ -423,25 +423,40 @@ class getSnapshotData(APIView):
         # List of all terms in the range of available terms as strings
         available_terms = []
 
-        for i in range(5):
+        for i in range(2):
             fall_yearterm = "FALL " + str(int(getYearTerm) - years_back + i)
             spring_yearterm = "SPRING " + \
                 str(int(getYearTerm) - years_back + i + 1)
 
             # Query for all fall terms based on the years back i,e. Fall 2016 - Fall 2021
-            temp_fall_list = list(HigherEdDatabase.objects.filter(
+            temp_fall_list_freshmen = list(HigherEdDatabase.objects.filter(
                 yearTerm=fall_yearterm, academicType=getAcademicType, studentType='FRESHMEN').values('id', 'data', 'studentType', 'yearTerm').distinct())
             # Query for all spring terms based on the years back i,e. Fall 2016 - Fall 2021
-            temp_spring_list = list(HigherEdDatabase.objects.filter(
+            temp_spring_list_freshmen = list(HigherEdDatabase.objects.filter(
                 yearTerm=spring_yearterm, academicType=getAcademicType, studentType='FRESHMEN').values('id', 'data', 'studentType', 'yearTerm').distinct())
+            # Query for all fall terms based on the years back i,e. Fall 2016 - Fall 2021
+            temp_fall_list_transfer = list(HigherEdDatabase.objects.filter(
+                yearTerm=fall_yearterm, academicType=getAcademicType, studentType='TRANSFER').values('id', 'data', 'studentType', 'yearTerm').distinct())
+            # Query for all spring terms based on the years back i,e. Fall 2016 - Fall 2021
+            temp_spring_list_transfer = list(HigherEdDatabase.objects.filter(
+                yearTerm=spring_yearterm, academicType=getAcademicType, studentType='TRANSFER').values('id', 'data', 'studentType', 'yearTerm').distinct())
 
             # These if statements check for empty queries in order to avoid them
-            if (temp_fall_list != []):
+            if (temp_fall_list_freshmen != []):
                 available_terms.append(fall_yearterm)
-                term_list.append(temp_fall_list[0])
-            if (temp_spring_list != []):
+                term_list.append(temp_fall_list_freshmen[0])
+
+            if (temp_fall_list_transfer != []):
+                available_terms.append(fall_yearterm)
+                term_list.append(temp_fall_list_transfer[0])
+
+            if (temp_spring_list_freshmen != []):
                 available_terms.append(spring_yearterm)
-                term_list.append(temp_spring_list[0])
+                term_list.append(temp_spring_list_freshmen[0])
+
+            if (temp_spring_list_transfer != []):
+                available_terms.append(spring_yearterm)
+                term_list.append(temp_spring_list_transfer[0])
 
         print(available_terms)
 
@@ -459,9 +474,9 @@ class getSnapshotData(APIView):
 
             # Find a higher ed object in term list that matches our available terms
             # We might not need
-            for obj in term_list:
-                if obj['yearTerm'] == available_terms[i]:
-                    higherEd_obj = obj
+            for term_list_index in range(len(term_list)):
+                if term_list[term_list_index]['yearTerm'] == available_terms[i] and term_list_index == i:
+                    higherEd_obj = term_list[term_list_index]
                     break
 
             # Find the matching prediction obj for the higher higher ed obj
@@ -472,6 +487,7 @@ class getSnapshotData(APIView):
 
             # Check whether the cohort is transfer or freshman
             transfer_bool = True if higherEd_obj['studentType'] == 'TRANSFER' else False
+            print(higherEd_obj['studentType'])
 
             # We ran the cohort train function to get the x matrix
             x_data = cohortTrain(prediction['numberOfStudents'], float(prediction['sigma']), float(prediction['alpha']),
@@ -496,14 +512,15 @@ class getSnapshotData(APIView):
 
                 padding_times = (2 * (grab_next_year-grab_first_year)
                                  ) if first_term[0] == available_terms[i][0] else 2 * (grab_next_year-grab_first_year) - 1
-                # print('is transfer or freshmen')
-                # print(transfer_bool)
-                # print('first term')
-                # print(first_term)
-                # print('next term')
-                # print(av_term)
-                # print('padding')
-                # print(padding_times)
+
+                print('is transfer or freshmen')
+                print(transfer_bool)
+                print('first term')
+                print(first_term)
+                print('next term')
+                print(av_term)
+                print('padding')
+                print(padding_times)
 
                 for times in range(padding_times):
                     for j in range(len(x_data)):
