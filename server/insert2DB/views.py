@@ -534,6 +534,12 @@ class getSnapshotData(APIView):
                         first_x_data[index][j] = first_x_data[index][j] + \
                             x_data[index][j]
 
+        total_enrollment = [0] * 16
+        for index in range(len(first_x_data)):
+            for j in range(len(first_x_data[0])):
+                total_enrollment[j] = total_enrollment[j] + \
+                    first_x_data[index][j]
+
         for index in range(len(first_x_data)):
             first_x_data[index] = np.array(first_x_data[index])
 
@@ -555,7 +561,7 @@ class getSnapshotData(APIView):
                     year_fall = int(year_fall) + 1
                     year_terms_labels.append("FALL " + str(year_fall))
 
-        data = {'NumOfFigures': 2, 'Figures': {'figure2': {'x-axis': year_terms_labels, '0% achieved': (first_x_data[0], '#000000'), '12.5% achieved': (first_x_data[1], '#E69F00'),
+        data = {'NumOfFigures': 3, 'Figures': {'figure2': {'x-axis': year_terms_labels, '0% achieved': (first_x_data[0], '#000000'), '12.5% achieved': (first_x_data[1], '#E69F00'),
                                                            '25% achieved': (first_x_data[2], '#56B4E9'), '37.5% achieved': (first_x_data[3], '#009E73'), '50% achieved': (first_x_data[4], '#F0E442'),
                                                            '62.5% achieved': (first_x_data[5], '#0072B2'), '75% achieved': (first_x_data[6], '#D55E00'), '87.5% achieved': (first_x_data[7], '#CC79A7'),
                                                            'description': ['Figure 1', 'Student Count in DCMs within University'], 'yLabel': 'Number of Students in Each Class'},
@@ -563,7 +569,12 @@ class getSnapshotData(APIView):
                                                            '25% achieved': ((first_x_data[2] + first_x_data[3]) / 2, '#E69F00'),
                                                            '50% achieved': ((first_x_data[4] + first_x_data[5]) / 2, '#56B4E9'),
                                                            '75% achieved': ((first_x_data[6] + first_x_data[7]) / 2, '#009E73'), 'description': ['Figure2', ' Student Count in Super DCMs within University'],
-                                                           'yLabel': 'Number of Students'}}}
+                                                           'yLabel': 'Number of Students'},
+
+                                               'figure1': {'x-axis': year_terms_labels, 'total_enrollment': (total_enrollment, '#000000'),
+                                                           'description': ['Figure1', 'Student Persistence and Graduation Count within University'], 'yLabel': 'Number of Students'}
+
+                                               }}
 
         return Response(data)
 
