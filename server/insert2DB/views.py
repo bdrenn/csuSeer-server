@@ -417,53 +417,86 @@ class getModifiedChartCohort(APIView):
 class getSnapshotData(APIView):
     def get(self, request, getYearTerm, getAcademicType):
         years_back = 5
-
+        # List of higher ed data for terms we have in the backend as objects
         term_list = []
+
+        # List of all terms in the range of available terms as strings
         available_terms = []
 
         for i in range(years_back):
             fall_yearterm = "FALL " + str(int(getYearTerm) - years_back + i)
             spring_yearterm = "SPRING " + \
-                str(int(getYearTerm) - years_back + i)
-            temp_fall_list = list(HigherEdDatabase.objects.filter(
-                yearTerm=fall_yearterm, academicType=getAcademicType).values('id', 'data', 'studentType', 'yearTerm').distinct())
-            temp_spring_list = list(HigherEdDatabase.objects.filter(
-                yearTerm=spring_yearterm, academicType=getAcademicType).values('id', 'data', 'studentType', 'yearTerm').distinct())
-            if (temp_fall_list != []):
+                str(int(getYearTerm) - years_back + i + 1)
+
+            # Query for all fall terms based on the years back i,e. Fall 2016 - Fall 2021
+            temp_fall_list_freshmen = list(HigherEdDatabase.objects.filter(
+                yearTerm=fall_yearterm, academicType=getAcademicType, studentType='FRESHMEN').values('id', 'data', 'studentType', 'yearTerm').distinct())
+            # Query for all spring terms based on the years back i,e. Fall 2016 - Fall 2021
+            temp_spring_list_freshmen = list(HigherEdDatabase.objects.filter(
+                yearTerm=spring_yearterm, academicType=getAcademicType, studentType='FRESHMEN').values('id', 'data', 'studentType', 'yearTerm').distinct())
+            # Query for all fall terms based on the years back i,e. Fall 2016 - Fall 2021
+            temp_fall_list_transfer = list(HigherEdDatabase.objects.filter(
+                yearTerm=fall_yearterm, academicType=getAcademicType, studentType='TRANSFER').values('id', 'data', 'studentType', 'yearTerm').distinct())
+            # Query for all spring terms based on the years back i,e. Fall 2016 - Fall 2021
+            temp_spring_list_transfer = list(HigherEdDatabase.objects.filter(
+                yearTerm=spring_yearterm, academicType=getAcademicType, studentType='TRANSFER').values('id', 'data', 'studentType', 'yearTerm').distinct())
+
+            # These if statements check for empty queries in order to avoid them
+            if (temp_fall_list_freshmen != []):
                 available_terms.append(fall_yearterm)
-                term_list.append(temp_fall_list[0])
-            if (temp_spring_list != []):
+                term_list.append(temp_fall_list_freshmen[0])
+
+            if (temp_fall_list_transfer != []):
+                available_terms.append(fall_yearterm)
+                term_list.append(temp_fall_list_transfer[0])
+
+            if (temp_spring_list_freshmen != []):
                 available_terms.append(spring_yearterm)
-                term_list.append(temp_spring_list[0])
+                term_list.append(temp_spring_list_freshmen[0])
 
+            if (temp_spring_list_transfer != []):
+                available_terms.append(spring_yearterm)
+                term_list.append(temp_spring_list_transfer[0])
+
+        print(available_terms)
+
+        # Query greek leetters and add them to prediction list
         prediction_list = []
-
         for higheredObj in term_list:
             prediction = predictionType.objects.filter(
                 UniqueID=higheredObj['id']).values()
             prediction_list.append(list(prediction)[0])
 
+        # We loop through the length all the semesters in available terms in order to get back the x values from the cohort model function
         for i in range(len(available_terms)):
             higherEd_obj = None
             prediction = None
 
-            for obj in term_list:
-                if obj['yearTerm'] == available_terms[i]:
-                    higherEd_obj = obj
+            # Find a higher ed object in term list that matches our available terms
+            # We might not need
+            for term_list_index in range(len(term_list)):
+                if term_list[term_list_index]['yearTerm'] == available_terms[i] and term_list_index == i:
+                    higherEd_obj = term_list[term_list_index]
                     break
 
+            # Find the matching prediction obj for the higher higher ed obj
             for term_prediction in prediction_list:
                 if term_prediction['UniqueID'] == str(higherEd_obj["id"]):
                     prediction = term_prediction
                     break
 
+            # Check whether the cohort is transfer or freshman
             transfer_bool = True if higherEd_obj['studentType'] == 'TRANSFER' else False
-            fall_x_data = cohortTrain(prediction['numberOfStudents'], float(prediction['sigma']), float(prediction['alpha']),
-                                      float(prediction['beta']), isTransfer=transfer_bool, isMarkov=False, steadyStateTrigger=False, excelData=higherEd_obj['data'], retrieveX=True)
-            fall_x_data = list(fall_x_data)
+            print(higherEd_obj['studentType'])
+
+            # We ran the cohort train function to get the x matrix
+            x_data = cohortTrain(prediction['numberOfStudents'], float(prediction['sigma']), float(prediction['alpha']),
+                                 float(prediction['beta']), isTransfer=transfer_bool, isMarkov=False, steadyStateTrigger=False, excelData=higherEd_obj['data'], retrieveX=True)
+
+            x_data = list(x_data)
 
             if i == 0:
-                first_x_data = fall_x_data
+                first_x_data = x_data
                 # Here for all the ranges now we go from 0 to 7 rather than 1 to 8
                 for index in range(len(first_x_data)):
                     first_x_data[index] = list(first_x_data[index][0:])
@@ -472,29 +505,45 @@ class getSnapshotData(APIView):
 
             if i != 0:
                 av_term = available_terms[i]
+
                 grab_first_year = int(
                     first_term[(len(first_term)-2): len(first_term)])
                 grab_next_year = int(av_term[(len(av_term)-2): len(av_term)])
 
-                padding_times = (2 *
-                                 (grab_next_year-grab_first_year)) if first_term[0] == available_terms[i][0] else 2 * (
-                    grab_next_year-grab_first_year) - 1
-                for time in range(padding_times):
-                    for j in range(len(fall_x_data)):
-                        if time == 0:
-                            # Here we want to access data at position j from 0 to : not 1 to :
-                            fall_x_data[j] = list(fall_x_data[j][0:])
-                        fall_x_data[j].insert(0, 0)
+                padding_times = (2 * (grab_next_year-grab_first_year)
+                                 ) if first_term[0] == available_terms[i][0] else 2 * (grab_next_year-grab_first_year) - 1
+
+                print('is transfer or freshmen')
+                print(transfer_bool)
+                print('first term')
+                print(first_term)
+                print('next term')
+                print(av_term)
+                print('padding')
+                print(padding_times)
+
+                for times in range(padding_times):
+                    for j in range(len(x_data)):
+                        if times == 0:
+                            # Here we want to access data at position j from 0: not 1:
+                            x_data[j] = list(x_data[j][0:])
+                        x_data[j].insert(0, 0)
 
                 for index in range(len(first_x_data)):
                     for j in range(len(first_x_data[0])):
                         first_x_data[index][j] = first_x_data[index][j] + \
-                            fall_x_data[index][j]
+                            x_data[index][j]
 
-        # Loop inside?
+        total_enrollment = [0] * 16
+        for index in range(len(first_x_data)):
+            for j in range(len(first_x_data[0])):
+                total_enrollment[j] = total_enrollment[j] + \
+                    first_x_data[index][j]
+
         for index in range(len(first_x_data)):
             first_x_data[index] = np.array(first_x_data[index])
 
+        # This portion creates the year term labels for the graph
         year_terms_labels = [available_terms[0]]
         year_fall = available_terms[0][len(
             available_terms[0])-2: len(available_terms[0])]
@@ -512,7 +561,7 @@ class getSnapshotData(APIView):
                     year_fall = int(year_fall) + 1
                     year_terms_labels.append("FALL " + str(year_fall))
 
-        data = {'NumOfFigures': 2, 'Figures': {'figure2': {'x-axis': year_terms_labels, '0% achieved': (first_x_data[0], '#000000'), '12.5% achieved': (first_x_data[1], '#E69F00'),
+        data = {'NumOfFigures': 3, 'Figures': {'figure2': {'x-axis': year_terms_labels, '0% achieved': (first_x_data[0], '#000000'), '12.5% achieved': (first_x_data[1], '#E69F00'),
                                                            '25% achieved': (first_x_data[2], '#56B4E9'), '37.5% achieved': (first_x_data[3], '#009E73'), '50% achieved': (first_x_data[4], '#F0E442'),
                                                            '62.5% achieved': (first_x_data[5], '#0072B2'), '75% achieved': (first_x_data[6], '#D55E00'), '87.5% achieved': (first_x_data[7], '#CC79A7'),
                                                            'description': ['Figure 1', 'Student Count in DCMs within University'], 'yLabel': 'Number of Students in Each Class'},
@@ -520,7 +569,12 @@ class getSnapshotData(APIView):
                                                            '25% achieved': ((first_x_data[2] + first_x_data[3]) / 2, '#E69F00'),
                                                            '50% achieved': ((first_x_data[4] + first_x_data[5]) / 2, '#56B4E9'),
                                                            '75% achieved': ((first_x_data[6] + first_x_data[7]) / 2, '#009E73'), 'description': ['Figure2', ' Student Count in Super DCMs within University'],
-                                                           'yLabel': 'Number of Students'}}}
+                                                           'yLabel': 'Number of Students'},
+
+                                               'figure1': {'x-axis': year_terms_labels, 'total_enrollment': (total_enrollment, '#000000'),
+                                                           'description': ['Figure1', 'Student Persistence and Graduation Count within University'], 'yLabel': 'Number of Students'}
+
+                                               }}
 
         return Response(data)
 
