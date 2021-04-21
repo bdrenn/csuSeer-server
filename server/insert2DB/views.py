@@ -572,7 +572,7 @@ class getSnapshotData(APIView):
                                                            'yLabel': 'Number of Students'},
 
                                                'figure1': {'x-axis': year_terms_labels, 'total_enrollment': (total_enrollment, '#000000'),
-                                                           'description': ['Figure1', 'Student Persistence and Graduation Count within University'], 'yLabel': 'Number of Students'}
+                                                           'description': ['Figure 3', 'Total enrollment within University '], 'yLabel': 'Number of Students'}
 
                                                }}
 
