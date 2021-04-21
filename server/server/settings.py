@@ -9,6 +9,8 @@ https://docs.djangoproject.com/en/2.2/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/2.2/ref/settings/
 """
+import dj_database_url
+import json
 from datetime import timedelta
 import os
 
@@ -18,8 +20,6 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/2.2/howto/deployment/checklist/
-
-
 
 
 # SECURITY WARNING: keep the secret key used in production secret!
@@ -37,6 +37,7 @@ REST_FRAMEWORK = {
     )
 }
 
+
 INSTALLED_APPS = [
     'insert2DB.apps.Insert2DbConfig',
     'django.contrib.admin',
@@ -48,6 +49,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework.authtoken',
     'corsheaders',
+    'django_rest_passwordreset',
 ]
 
 MIDDLEWARE = [
@@ -91,11 +93,11 @@ DATABASES = {
     'default': {
         'ENGINE': 'djongo',
         'NAME': 'csuSeerDBtry4',
-	#'CLIENT': {
-	#	'username': 'jackson',
-	#	'password': 'pass',
-	#	'authSource': 'csuOracleDB'
-	#}
+        # 'CLIENT': {
+        #	'username': 'jackson',
+        #	'password': 'pass',
+        #	'authSource': 'csuOracleDB'
+        # }
     }
 }
 
@@ -118,12 +120,11 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-import json
 file = open("server/secret_constants.json", "r")
 secretkey = json.loads(file.read())
 
 SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=5),
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=30),
     'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
     'ROTATE_REFRESH_TOKENS': False,
     'BLACKLIST_AFTER_ROTATION': True,
@@ -144,7 +145,7 @@ SIMPLE_JWT = {
     'JTI_CLAIM': 'jti',
 
     'SLIDING_TOKEN_REFRESH_EXP_CLAIM': 'refresh_exp',
-    'SLIDING_TOKEN_LIFETIME': timedelta(minutes=5),
+    'SLIDING_TOKEN_LIFETIME': timedelta(days=1),
     'SLIDING_TOKEN_REFRESH_LIFETIME': timedelta(days=1),
 }
 
@@ -165,7 +166,6 @@ USE_TZ = True
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/2.2/howto/static-files/
-import dj_database_url
 db_from_env = dj_database_url.config(conn_max_age=500)
 DATABASES['default'].update(db_from_env)
 
@@ -184,9 +184,13 @@ STATICFILES_DIRS = (
 
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
-EMAIL_HOST_USER = 'csumarkov@gmail.com'
+EMAIL_HOST_USER = 'csuseer2021@gmail.com'
 EMAIL_HOST_PASSWORD = 'Wordpass123'
 EMAIL_USE_TLS = True
 CORS_ORIGIN_WHITELIST = 'http://localhost:4200',
+
+# Set in hrs if we want reset password token to be expired before 24 hrs
+DJANGO_REST_MULTITOKENAUTH_RESET_TOKEN_EXPIRY_TIME = 1
