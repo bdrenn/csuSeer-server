@@ -183,7 +183,7 @@ def cohortTrain(nStudents, s, b, a, isTransfer, isMarkov, steadyStateTrigger, ex
     y = y[1:]
     graduating = graduating[1:]
 
-    # Here we need to grab values from 1 to 8 for x but appends them in x_ from 0 to 7, so we needed to change values in graph as well (line 217
+    # Here we need to grab values from 1 to 8 for x but appends them in x_ from 0 to 7, so we needed to change values in graph as well (line 217)
     # this fixed it for transfer
     x_ = []
     if isTransfer:
@@ -212,8 +212,6 @@ def cohortTrain(nStudents, s, b, a, isTransfer, isMarkov, steadyStateTrigger, ex
                                   graduated[6], graduated[7], graduated[8], graduated[9], graduated[10], graduated[11], graduated[12]]
         data['persistance_data'] = [cohortpersistance[0], cohortpersistance[1], cohortpersistance[2], cohortpersistance[3], cohortpersistance[4], cohortpersistance[5],
                                     cohortpersistance[6], cohortpersistance[7], cohortpersistance[8], cohortpersistance[9], cohortpersistance[10], cohortpersistance[11], cohortpersistance[12]]
-        # data = [graduated[1], graduated[2], graduated[3], graduated[4], graduated[5], graduated[6],
-        #         graduated[7], graduated[8], graduated[9], graduated[10], graduated[11], graduated[12], graduated[13]]
 
     else:
         data = {'figure1': {'x-axis': time, 'persistence': (y, '#000000'), 'coeGrad': (graduating, '#E69F00'),
@@ -229,14 +227,11 @@ def cohortTrain(nStudents, s, b, a, isTransfer, isMarkov, steadyStateTrigger, ex
                             'yLabel': 'Number of Students'}}
 
         if p != 1:
+            # Remove trailing zeros after persistance drops to 0
             excelData['PERSIST COUNT'] = removeTrailingZeroes(
                 excelData['PERSIST COUNT'])
-            excelData['RETENTION COUNT'] = removeTrailingZeroes(
-                excelData['RETENTION COUNT'])
             excelData['RETENTION COUNT'] = excelData['RETENTION COUNT'][0:len(
                 excelData['PERSIST COUNT'])]
-            excelData['GRADUATION COUNT'] = removeTrailingZeroes(
-                excelData['GRADUATION COUNT'])
             excelData['GRADUATION COUNT'] = excelData['GRADUATION COUNT'][0:len(
                 excelData['PERSIST COUNT'])]
 

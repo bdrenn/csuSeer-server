@@ -20,10 +20,9 @@ def cost(x, nStudents, excelData):
     cohort_grad = excelData["GRADUATION COUNT"]
     cohort_persis = excelData["PERSIST COUNT"]
     graderror1 = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-    persistanterro1 = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    persistanterror1 = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
     endsumerror = []
     cohort_persis = removeTrailingZeroes(cohort_persis)
-    breakFlag = False
     for j in range(0, len(x)):
         s = x[j, 0]
         b = x[j, 1]
@@ -33,10 +32,13 @@ def cost(x, nStudents, excelData):
             nStudents, s, b, a, isTransfer=False, isMarkov=True, steadyStateTrigger=False, excelData={}, retrieveX=False)
         grad = cohort_train['graduated_data']
         persis = cohort_train['persistance_data']
-        for i in range(0, len(cohort_persis)):
-            graderror1[i] = abs(cohort_grad[i]-(grad[i] * nStudents)) * 2.5
-            persistanterro1[i] = abs(cohort_persis[i]-(persis[i]))
 
-        endsumerror.append(np.sum(graderror1) + np.sum(persistanterro1))
+        for i in range(0, len(cohort_persis)):
+            # The error is calculated by subtracting data - model
+            # The value 2.5 is just to give more weight to graderror than persistanerror (it can be adjusted as needed)
+            graderror1[i] = abs(cohort_grad[i]-(grad[i] * nStudents)) * 2.5
+            persistanterror1[i] = abs(cohort_persis[i]-(persis[i]))
+
+        endsumerror.append(np.sum(graderror1) + np.sum(persistanterror1))
 
     return endsumerror
